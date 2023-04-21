@@ -5,6 +5,7 @@ import (
 
 	"github.com/ekkinox/fx-template/handler"
 	"github.com/ekkinox/fx-template/server"
+
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
