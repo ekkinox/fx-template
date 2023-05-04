@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
+	"strings"
 )
 
 type TestService struct {
@@ -20,5 +21,5 @@ func NewTestService(config *fxconfig.Config, logger *fxlogger.Logger) *TestServi
 func (s *TestService) Test() string {
 	s.logger.Info().Msg("called TestService::Test()")
 
-	return s.config.AppName
+	return strings.ToUpper(s.config.AppName)
 }
