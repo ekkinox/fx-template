@@ -7,7 +7,6 @@ import (
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 
 	"go.uber.org/fx"
-	"go.uber.org/fx/fxevent"
 )
 
 func main() {
@@ -18,9 +17,5 @@ func main() {
 		fxhttpserver.HttpServerModule,
 		// app module
 		app.AppModule,
-		// logger
-		fx.WithLogger(func(logger *fxlogger.Logger) fxevent.Logger {
-			return &fxlogger.FxEventLogger{Logger: logger}
-		}),
 	).Run()
 }
