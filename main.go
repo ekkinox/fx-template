@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ekkinox/fx-template/handler"
+	"github.com/ekkinox/fx-template/app"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
@@ -12,15 +12,13 @@ import (
 
 func main() {
 	fx.New(
-		//modules
+		// core modules
 		fxconfig.ConfigModule,
 		fxlogger.LoggerModule,
 		fxhttpserver.HttpServerModule,
-		//providers
-		fx.Provide(
-			fxhttpserver.AsHttpServerHandler(handler.NewHelloHandler),
-		),
-		//logger
+		// app module
+		app.AppModule,
+		// logger
 		fx.WithLogger(func(logger *fxlogger.Logger) fxevent.Logger {
 			return &fxlogger.FxEventLogger{Logger: logger}
 		}),

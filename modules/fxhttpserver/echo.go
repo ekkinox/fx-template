@@ -14,7 +14,12 @@ type EchoParam struct {
 	Handlers []HttpServerHandler `group:"http-server-handlers"`
 }
 
-func NewEcho(p EchoParam) *echo.Echo {
+type EchoResult struct {
+	fx.Out
+	Echo *echo.Echo
+}
+
+func NewEcho(p EchoParam) EchoResult {
 	e := echo.New()
 
 	for _, h := range p.Handlers {
@@ -36,5 +41,7 @@ func NewEcho(p EchoParam) *echo.Echo {
 		},
 	))
 
-	return e
+	return EchoResult{
+		Echo: e,
+	}
 }
