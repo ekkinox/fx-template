@@ -30,6 +30,7 @@ func (*HelloHandler) Path() string {
 
 func (h *HelloHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
+
 		return c.String(http.StatusOK, fmt.Sprintf("Hello %s world from %s.", c.Param("name"), h.config.AppName))
 	}
 }
