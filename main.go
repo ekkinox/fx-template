@@ -1,31 +1,31 @@
 package main
 
 import (
+	"github.com/ekkinox/fx-template/handler"
+	"github.com/ekkinox/fx-template/modules/fxhttpserver"
 	"net/http"
 
-	"github.com/ekkinox/fx-template/handler"
-	"github.com/ekkinox/fx-template/server"
-
+	"github.com/ekkinox/fx-template/modules/fxconfig"
+	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
-	"go.uber.org/zap"
 )
 
 func main() {
 	fx.New(
+		//modules
+		fxconfig.ConfigModule,
+		fxlogger.LoggerModule,
+		fxhttpserver.HttpServerModule,
+		//providers
 		fx.Provide(
-			server.NewHTTPServer,
-			fx.Annotate(
-				server.NewServeMux,
-				fx.ParamTags(`group:"routes"`),
-			),
-			server.AsRoute(handler.NewEchoHandler),
-			server.AsRoute(handler.NewHelloHandler),
-			zap.NewExample,
+			fxhttpserver.AsHttpServerHandler(handler.NewHelloHandler),
 		),
+		//invokes
 		fx.Invoke(func(*http.Server) {}),
-		fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
-			return &fxevent.ZapLogger{Logger: log}
+		//logger
+		fx.WithLogger(func(logger *fxlogger.Logger) fxevent.Logger {
+			return &fxlogger.FxEventLogger{Logger: logger}
 		}),
 	).Run()
 }
