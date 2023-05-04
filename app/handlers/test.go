@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/ekkinox/fx-template/app/services"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
+
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 type TestHandler struct {

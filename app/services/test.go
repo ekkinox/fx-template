@@ -1,9 +1,10 @@
 package services
 
 import (
+	"strings"
+
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
-	"strings"
 )
 
 type TestService struct {
