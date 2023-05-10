@@ -10,22 +10,22 @@ import (
 	"net/http"
 )
 
-var HttpServerModule = fx.Module("http-server",
+var FxHttpServerModule = fx.Module("http-server",
 	fx.Provide(
 		NewEcho,
-		NewHTTPServer,
+		NewFxHttpServer,
 	),
 	fx.Invoke(func(*http.Server) {}),
 )
 
-type HTTPServerParam struct {
+type FxHttpServerParam struct {
 	fx.In
 	Config    *fxconfig.Config
 	Echo      *echo.Echo
 	LifeCycle fx.Lifecycle
 }
 
-func NewHTTPServer(p HTTPServerParam) *http.Server {
+func NewFxHttpServer(p FxHttpServerParam) *http.Server {
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", p.Config.AppPort),

@@ -8,7 +8,7 @@ type Config struct {
 	AppDebug bool
 }
 
-func newConfig() *Config {
+func NewConfig() *Config {
 
 	viper.AutomaticEnv()
 	setConfigDefaults()

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/labstack/echo/v4"
 	"strings"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
@@ -19,8 +20,9 @@ func NewTestService(config *fxconfig.Config, logger *fxlogger.Logger) *TestServi
 	}
 }
 
-func (s *TestService) Test() string {
-	s.logger.Info().Msg("called TestService::Test()")
+func (s *TestService) Test(c echo.Context) string {
+
+	fxlogger.Ctx(c.Request().Context()).Info().Msg("[lecho-ctx] called TestService::Test()")
 
 	return strings.ToUpper(s.config.AppName)
 }

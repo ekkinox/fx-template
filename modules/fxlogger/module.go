@@ -2,31 +2,39 @@ package fxlogger
 
 import (
 	"github.com/ekkinox/fx-template/modules/fxconfig"
+	"github.com/labstack/gommon/log"
 	"go.uber.org/fx"
-	"go.uber.org/fx/fxevent"
+	"os"
 )
 
-var LoggerModule = fx.Module("logger",
-	fx.WithLogger(func(logger *Logger) fxevent.Logger {
-		return &FxEventLogger{Logger: logger}
-	}),
+var FxLoggerModule = fx.Module("logger",
 	fx.Provide(
-		NewLogger,
+		NewFxLogger,
 	),
 )
 
-type LoggerParam struct {
+type FxLoggerParam struct {
 	fx.In
 	Config *fxconfig.Config
 }
 
-type LoggerResult struct {
+type FxLoggerResult struct {
 	fx.Out
 	Logger *Logger
 }
 
-func NewLogger(p LoggerParam) LoggerResult {
-	return LoggerResult{
-		Logger: newLogger(p.Config.AppName),
+func NewFxLogger(p FxLoggerParam) FxLoggerResult {
+
+	lvl := log.INFO
+	if p.Config.AppDebug {
+		lvl = log.DEBUG
+	}
+
+	return FxLoggerResult{
+		Logger: NewLogger(
+			os.Stdout,
+			WithField("service", p.Config.AppName),
+			WithLevel(lvl),
+		),
 	}
 }

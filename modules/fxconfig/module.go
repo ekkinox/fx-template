@@ -2,19 +2,19 @@ package fxconfig
 
 import "go.uber.org/fx"
 
-var ConfigModule = fx.Module("config",
+var FxConfigModule = fx.Module("config",
 	fx.Provide(
-		NewConfig,
+		NewFxConfig,
 	),
 )
 
-type ConfigResult struct {
+type FxConfigResult struct {
 	fx.Out
 	Config *Config
 }
 
-func NewConfig() ConfigResult {
-	return ConfigResult{
-		Config: newConfig(),
+func NewFxConfig() FxConfigResult {
+	return FxConfigResult{
+		Config: NewConfig(),
 	}
 }

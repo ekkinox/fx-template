@@ -26,20 +26,10 @@ func NewEcho(p EchoParam) EchoResult {
 		e.Add(strings.ToUpper(h.Method()), h.Path(), h.Handle())
 	}
 
-	e.Use(middleware.RequestLoggerWithConfig(
-		middleware.RequestLoggerConfig{
-			LogURI:    true,
-			LogStatus: true,
-			LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-				p.Logger.Info().
-					Str("URI", v.URI).
-					Int("status", v.Status).
-					Msg("request")
-
-				return nil
-			},
-		},
-	))
+	e.Use(middleware.RequestID())
+	e.Use(fxlogger.Middleware(fxlogger.Config{
+		Logger: p.Logger,
+	}))
 
 	return EchoResult{
 		Echo: e,

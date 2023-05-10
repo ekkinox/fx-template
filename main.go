@@ -5,6 +5,7 @@ import (
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
+	"go.uber.org/fx/fxevent"
 
 	"go.uber.org/fx"
 )
@@ -12,10 +13,14 @@ import (
 func main() {
 	fx.New(
 		// core modules
-		fxconfig.ConfigModule,
-		fxlogger.LoggerModule,
-		fxhttpserver.HttpServerModule,
+		fxconfig.FxConfigModule,
+		fxlogger.FxLoggerModule,
+		fxhttpserver.FxHttpServerModule,
 		// app module
 		app.AppModule,
+		// logger
+		fx.WithLogger(func(log *fxlogger.Logger) fxevent.Logger {
+			return log
+		}),
 	).Run()
 }
