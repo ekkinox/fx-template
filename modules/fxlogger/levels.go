@@ -35,8 +35,8 @@ func MatchEchoLevel(level log.Lvl) (zerolog.Level, log.Lvl) {
 	return zerolog.NoLevel, log.OFF
 }
 
-// MatchZeroLevel returns an echo level and zerolog level for a given zerolog level
-func MatchZeroLevel(level zerolog.Level) (log.Lvl, zerolog.Level) {
+// MatchZerologLevel returns an echo level and zerolog level for a given zerolog level
+func MatchZerologLevel(level zerolog.Level) (log.Lvl, zerolog.Level) {
 	elvl, found := zeroLevels[level]
 
 	if found {

@@ -28,7 +28,8 @@ func NewEcho(p EchoParam) EchoResult {
 
 	e.Use(middleware.RequestID())
 	e.Use(fxlogger.Middleware(fxlogger.Config{
-		Logger: p.Logger,
+		Logger:      p.Logger,
+		HandleError: true,
 	}))
 
 	return EchoResult{

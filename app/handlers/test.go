@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"github.com/rs/zerolog"
 	"net/http"
@@ -33,6 +34,8 @@ func (*TestHandler) Path() string {
 
 func (h *TestHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
+
+		return errors.New("ggg")
 
 		name := c.Param("name")
 

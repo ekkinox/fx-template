@@ -3,6 +3,7 @@ package fxlogger
 // see https://github.com/ziflex/lecho
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -46,91 +47,91 @@ func newLogger(log zerolog.Logger, setters []Setter) *Logger {
 	}
 }
 
-func (l Logger) Debug(i ...interface{}) {
+func (l *Logger) Debug(i ...interface{}) {
 	l.log.Debug().Msg(fmt.Sprint(i...))
 }
 
-func (l Logger) Debugf(format string, i ...interface{}) {
+func (l *Logger) Debugf(format string, i ...interface{}) {
 	l.log.Debug().Msgf(format, i...)
 }
 
-func (l Logger) Debugj(j log.JSON) {
+func (l *Logger) Debugj(j log.JSON) {
 	l.logJSON(l.log.Debug(), j)
 }
 
-func (l Logger) Info(i ...interface{}) {
+func (l *Logger) Info(i ...interface{}) {
 	l.log.Info().Msg(fmt.Sprint(i...))
 }
 
-func (l Logger) Infof(format string, i ...interface{}) {
+func (l *Logger) Infof(format string, i ...interface{}) {
 	l.log.Info().Msgf(format, i...)
 }
 
-func (l Logger) Infoj(j log.JSON) {
+func (l *Logger) Infoj(j log.JSON) {
 	l.logJSON(l.log.Info(), j)
 }
 
-func (l Logger) Warn(i ...interface{}) {
+func (l *Logger) Warn(i ...interface{}) {
 	l.log.Warn().Msg(fmt.Sprint(i...))
 }
 
-func (l Logger) Warnf(format string, i ...interface{}) {
+func (l *Logger) Warnf(format string, i ...interface{}) {
 	l.log.Warn().Msgf(format, i...)
 }
 
-func (l Logger) Warnj(j log.JSON) {
+func (l *Logger) Warnj(j log.JSON) {
 	l.logJSON(l.log.Warn(), j)
 }
 
-func (l Logger) Error(i ...interface{}) {
+func (l *Logger) Error(i ...interface{}) {
 	l.log.Error().Msg(fmt.Sprint(i...))
 }
 
-func (l Logger) Errorf(format string, i ...interface{}) {
+func (l *Logger) Errorf(format string, i ...interface{}) {
 	l.log.Error().Msgf(format, i...)
 }
 
-func (l Logger) Errorj(j log.JSON) {
+func (l *Logger) Errorj(j log.JSON) {
 	l.logJSON(l.log.Error(), j)
 }
 
-func (l Logger) Fatal(i ...interface{}) {
+func (l *Logger) Fatal(i ...interface{}) {
 	l.log.Fatal().Msg(fmt.Sprint(i...))
 }
 
-func (l Logger) Fatalf(format string, i ...interface{}) {
+func (l *Logger) Fatalf(format string, i ...interface{}) {
 	l.log.Fatal().Msgf(format, i...)
 }
 
-func (l Logger) Fatalj(j log.JSON) {
+func (l *Logger) Fatalj(j log.JSON) {
 	l.logJSON(l.log.Fatal(), j)
 }
 
-func (l Logger) Panic(i ...interface{}) {
+func (l *Logger) Panic(i ...interface{}) {
 	l.log.Panic().Msg(fmt.Sprint(i...))
 }
 
-func (l Logger) Panicf(format string, i ...interface{}) {
+func (l *Logger) Panicf(format string, i ...interface{}) {
 	l.log.Panic().Msgf(format, i...)
 }
 
-func (l Logger) Panicj(j log.JSON) {
+func (l *Logger) Panicj(j log.JSON) {
 	l.logJSON(l.log.Panic(), j)
 }
 
-func (l Logger) Print(i ...interface{}) {
+func (l *Logger) Print(i ...interface{}) {
 	l.log.WithLevel(zerolog.NoLevel).Str("level", "-").Msg(fmt.Sprint(i...))
 }
 
-func (l Logger) Printf(format string, i ...interface{}) {
+func (l *Logger) Printf(format string, i ...interface{}) {
 	l.log.WithLevel(zerolog.NoLevel).Str("level", "-").Msgf(format, i...)
 }
 
-func (l Logger) Printj(j log.JSON) {
+func (l *Logger) Printj(j log.JSON) {
 	l.logJSON(l.log.WithLevel(zerolog.NoLevel).Str("level", "-"), j)
 }
 
-func (l Logger) Output() io.Writer {
+func (l *Logger) Output() io.Writer {
 	return l.log
 }
 
@@ -139,7 +140,7 @@ func (l *Logger) SetOutput(newOut io.Writer) {
 	l.log = l.log.Output(newOut)
 }
 
-func (l Logger) Level() log.Lvl {
+func (l *Logger) Level() log.Lvl {
 	return l.level
 }
 
@@ -151,11 +152,11 @@ func (l *Logger) SetLevel(level log.Lvl) {
 	l.log = l.log.Level(zlvl)
 }
 
-func (l Logger) Prefix() string {
+func (l *Logger) Prefix() string {
 	return l.prefix
 }
 
-func (l Logger) SetHeader(h string) {
+func (l *Logger) SetHeader(h string) {
 	// not implemented
 }
 
@@ -170,6 +171,10 @@ func (l *Logger) SetPrefix(newPrefix string) {
 
 func (l *Logger) Unwrap() zerolog.Logger {
 	return l.log
+}
+
+func (l *Logger) WithContext(ctx context.Context) context.Context {
+	return l.Unwrap().WithContext(ctx)
 }
 
 func (l *Logger) logJSON(event *zerolog.Event, j log.JSON) {

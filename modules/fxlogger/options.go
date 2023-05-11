@@ -16,7 +16,7 @@ type (
 )
 
 func newOptions(log zerolog.Logger, setters []Setter) *Options {
-	elvl, _ := MatchZeroLevel(log.GetLevel())
+	elvl, _ := MatchZerologLevel(log.GetLevel())
 
 	opts := &Options{
 		context: log.With(),
