@@ -5,6 +5,7 @@ import (
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
+	"github.com/ekkinox/fx-template/modules/fxtracer"
 	"go.uber.org/fx/fxevent"
 
 	"go.uber.org/fx"
@@ -15,6 +16,7 @@ func main() {
 		// core modules
 		fxconfig.FxConfigModule,
 		fxlogger.FxLoggerModule,
+		fxtracer.FxTracerModule,
 		fxhttpserver.FxHttpServerModule,
 		// app module
 		app.AppModule,

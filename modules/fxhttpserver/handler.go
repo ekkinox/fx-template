@@ -12,9 +12,9 @@ type HttpServerHandler interface {
 	Middlewares() []echo.MiddlewareFunc
 }
 
-func AsHttpServerHandler(f any) any {
+func AsHttpServerHandler(h any) any {
 	return fx.Annotate(
-		f,
+		h,
 		fx.As(new(HttpServerHandler)),
 		fx.ResultTags(`group:"http-server-handlers"`),
 	)
