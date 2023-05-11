@@ -8,7 +8,8 @@ import (
 type HttpServerHandler interface {
 	Method() string
 	Path() string
-	Handle() echo.HandlerFunc
+	Handler() echo.HandlerFunc
+	Middlewares() []echo.MiddlewareFunc
 }
 
 func AsHttpServerHandler(f any) any {

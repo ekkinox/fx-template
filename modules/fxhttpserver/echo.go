@@ -23,7 +23,7 @@ func NewEcho(p EchoParam) EchoResult {
 	e := echo.New()
 
 	for _, h := range p.Handlers {
-		e.Add(strings.ToUpper(h.Method()), h.Path(), h.Handle())
+		e.Add(strings.ToUpper(h.Method()), h.Path(), h.Handler(), h.Middlewares()...)
 	}
 
 	e.Use(middleware.RequestID())

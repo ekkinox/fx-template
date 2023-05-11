@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
-	"github.com/rs/zerolog"
 	"net/http"
 
 	"github.com/ekkinox/fx-template/app/services"
@@ -13,13 +11,11 @@ import (
 )
 
 type TestHandler struct {
-	logger  *fxlogger.Logger
 	service *services.TestService
 }
 
 func NewHelloHandler(logger *fxlogger.Logger, service *services.TestService) *TestHandler {
 	return &TestHandler{
-		logger:  logger,
 		service: service,
 	}
 }
@@ -32,22 +28,34 @@ func (*TestHandler) Path() string {
 	return "/test/:name"
 }
 
-func (h *TestHandler) Handle() echo.HandlerFunc {
+func (h *TestHandler) Handler() echo.HandlerFunc {
 	return func(c echo.Context) error {
-
-		return errors.New("ggg")
 
 		name := c.Param("name")
 
-		c.Logger().Info("raw info")
+		c.Logger().Infof("called %s with name=%s", c.Path(), name)
 
-		fxlogger.EchoCtx(c).Info().Msg("other raw info")
-
-		zerolog.Ctx(c.Request().Context()).Info().Msgf("called %s with name %s", h.Path(), name)
+		output, err := h.service.Test(c)
+		if err != nil {
+			c.Logger().Errorf("handler failed=%s", err)
+			return err
+		}
 
 		return c.String(
 			http.StatusOK,
-			fmt.Sprintf("Test hello world for %s. Service output: %s.", name, h.service.Test(c)),
+			fmt.Sprintf("Service output: %s.", output),
 		)
+	}
+}
+
+func (h *TestHandler) Middlewares() []echo.MiddlewareFunc {
+	return []echo.MiddlewareFunc{
+		func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c echo.Context) error {
+				c.Logger().Info("custom handler middleware adding custom response header")
+				c.Response().Header().Set("x-custom-header", "/test/:name")
+				return next(c)
+			}
+		},
 	}
 }

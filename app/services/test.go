@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"github.com/labstack/echo/v4"
 	"strings"
 
@@ -10,19 +11,24 @@ import (
 
 type TestService struct {
 	config *fxconfig.Config
-	logger *fxlogger.Logger
 }
 
 func NewTestService(config *fxconfig.Config, logger *fxlogger.Logger) *TestService {
 	return &TestService{
 		config: config,
-		logger: logger,
 	}
 }
 
-func (s *TestService) Test(c echo.Context) string {
+func (s *TestService) Test(c echo.Context) (string, error) {
 
-	fxlogger.Ctx(c.Request().Context()).Info().Msg("[lecho-ctx] called TestService::Test()")
+	c.Logger().Info("service TestService invoked")
 
-	return strings.ToUpper(s.config.AppName)
+	if s.config.AppShouldFail {
+		e := errors.New("failure")
+
+		c.Logger().Errorf("app was configured to fail: %v", e)
+		return "", e
+	}
+
+	return strings.ToUpper(s.config.AppName), nil
 }
