@@ -23,12 +23,12 @@ func (s *TestService) Test(c echo.Context) (string, error) {
 
 	c.Logger().Info("service TestService invoked")
 
-	if s.config.AppShouldFail {
+	if s.config.GetBool("APP_SHOULD_FAIL") {
 		e := errors.New("failure")
 
 		c.Logger().Errorf("app was configured to fail: %v", e)
 		return "", e
 	}
 
-	return strings.ToUpper(s.config.AppName), nil
+	return strings.ToUpper(s.config.AppConfig.Name), nil
 }

@@ -26,14 +26,14 @@ type FxLoggerResult struct {
 func NewFxLogger(p FxLoggerParam) FxLoggerResult {
 
 	lvl := log.INFO
-	if p.Config.AppDebug {
+	if p.Config.AppConfig.Debug {
 		lvl = log.DEBUG
 	}
 
 	return FxLoggerResult{
 		Logger: NewLogger(
 			os.Stdout,
-			WithField("service", p.Config.AppName),
+			WithField("service", p.Config.AppConfig.Name),
 			WithLevel(lvl),
 		),
 	}

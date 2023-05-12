@@ -28,7 +28,7 @@ type FxHttpServerParam struct {
 func NewFxHttpServer(p FxHttpServerParam) *http.Server {
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", p.Config.AppPort),
+		Addr:    fmt.Sprintf(":%d", p.Config.AppConfig.Port),
 		Handler: p.Echo,
 	}
 
