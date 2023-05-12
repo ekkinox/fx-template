@@ -18,23 +18,16 @@ type FxLoggerParam struct {
 	Config *fxconfig.Config
 }
 
-type FxLoggerResult struct {
-	fx.Out
-	Logger *Logger
-}
-
-func NewFxLogger(p FxLoggerParam) FxLoggerResult {
+func NewFxLogger(p FxLoggerParam) *Logger {
 
 	lvl := log.INFO
 	if p.Config.AppConfig.Debug {
 		lvl = log.DEBUG
 	}
 
-	return FxLoggerResult{
-		Logger: NewLogger(
-			os.Stdout,
-			WithField("service", p.Config.AppConfig.Name),
-			WithLevel(lvl),
-		),
-	}
+	return NewLogger(
+		os.Stdout,
+		WithField("service", p.Config.AppConfig.Name),
+		WithLevel(lvl),
+	)
 }

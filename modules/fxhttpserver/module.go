@@ -4,47 +4,56 @@ import (
 	"context"
 	"fmt"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
+	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/fx"
-	"net"
-	"net/http"
+	"strings"
 )
 
 var FxHttpServerModule = fx.Module("http-server",
 	fx.Provide(
-		NewEcho,
 		NewFxHttpServer,
 	),
-	fx.Invoke(func(*http.Server) {}),
+	fx.Invoke(func(*echo.Echo) {}),
 )
 
 type FxHttpServerParam struct {
 	fx.In
-	Config    *fxconfig.Config
-	Echo      *echo.Echo
 	LifeCycle fx.Lifecycle
+	Config    *fxconfig.Config
+	Logger    *fxlogger.Logger
+	Handlers  []HttpServerHandler `group:"http-server-handlers"`
 }
 
-func NewFxHttpServer(p FxHttpServerParam) *http.Server {
+func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
+	e := echo.New()
 
-	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", p.Config.AppConfig.Port),
-		Handler: p.Echo,
+	e.HideBanner = true
+	e.Logger = p.Logger
+
+	e.Use(middleware.RequestID())
+	e.Use(fxlogger.Middleware(fxlogger.Config{
+		Logger:      p.Logger,
+		HandleError: true,
+	}))
+
+	for _, h := range p.Handlers {
+		e.Add(strings.ToUpper(h.Method()), h.Path(), h.Handler(), h.Middlewares()...)
 	}
 
 	p.LifeCycle.Append(fx.Hook{
+		// start
 		OnStart: func(ctx context.Context) error {
-			ln, err := net.Listen("tcp", server.Addr)
-			if err != nil {
-				return err
-			}
-			go server.Serve(ln)
+			go e.Start(fmt.Sprintf(":%d", p.Config.AppConfig.Port))
 			return nil
+
 		},
+		// stop
 		OnStop: func(ctx context.Context) error {
-			return server.Shutdown(ctx)
+			return e.Shutdown(ctx)
 		},
 	})
 
-	return server
+	return e
 }

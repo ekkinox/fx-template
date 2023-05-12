@@ -1,8 +1,81 @@
 package fxtracer
 
-type TracerProvider struct {
-}
+import (
+	"context"
+	"time"
 
-func NewTracerProvider() *TracerProvider {
-	return &TracerProvider{}
+	"github.com/ekkinox/fx-template/modules/fxconfig"
+	"github.com/ekkinox/fx-template/modules/fxlogger"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	stdout "go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+func NewTracerProvider(config *fxconfig.Config, logger *fxlogger.Logger) (*trace.TracerProvider, error) {
+
+	bgCtx := context.Background()
+
+	res, err := resource.New(
+		bgCtx,
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String(config.AppConfig.Name),
+		),
+	)
+	if err != nil {
+		logger.Errorf("failed to create tracing resource: %v", err)
+		return nil, err
+	}
+
+	var bsp trace.SpanProcessor
+	if config.GetBool("TRACING_ENABLED") {
+
+		dialCtx, cancel := context.WithTimeout(bgCtx, 5*time.Second)
+		defer cancel()
+
+		conn, err := grpc.DialContext(
+			dialCtx,
+			config.GetString("TRACING_COLLECTOR"),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithBlock(),
+		)
+		if err != nil {
+			logger.Errorf("failed to create gRPC connection to tracing collector: %v", err)
+			return nil, err
+		}
+
+		traceExporter, err := otlptracegrpc.New(dialCtx, otlptracegrpc.WithGRPCConn(conn))
+		if err != nil {
+			logger.Errorf("failed to create gRPC tracing exporter: %v", err)
+			return nil, err
+		}
+
+		bsp = trace.NewBatchSpanProcessor(traceExporter)
+	} else {
+		exporter, err := stdout.New(stdout.WithPrettyPrint())
+		if err != nil {
+			return nil, err
+		}
+
+		bsp = trace.NewBatchSpanProcessor(exporter)
+	}
+
+	tracerProvider := trace.NewTracerProvider(
+		trace.WithSampler(trace.AlwaysSample()),
+		trace.WithResource(res),
+		trace.WithSpanProcessor(bsp),
+	)
+
+	otel.SetTracerProvider(tracerProvider)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+
+	logger.Debug("tracer is ready")
+
+	return tracerProvider, nil
 }

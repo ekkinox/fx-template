@@ -8,13 +8,6 @@ var FxConfigModule = fx.Module("config",
 	),
 )
 
-type FxConfigResult struct {
-	fx.Out
-	Config *Config
-}
-
-func NewFxConfig() FxConfigResult {
-	return FxConfigResult{
-		Config: NewConfig(),
-	}
+func NewFxConfig() *Config {
+	return NewConfig()
 }

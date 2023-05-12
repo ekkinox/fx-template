@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/ekkinox/fx-template/modules/fxlogger"
-
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 )
