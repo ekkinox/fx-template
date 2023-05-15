@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
-	"github.com/labstack/echo/v4"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/fx"
 )
@@ -15,17 +13,6 @@ var FxTracerModule = fx.Module(
 	fx.Provide(
 		NewFxTracer,
 	),
-	fx.Decorate(func(e *echo.Echo) *echo.Echo {
-		e.Use(otelecho.Middleware("my-app"))
-		e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(c echo.Context) error {
-				c.Logger().Info("tracer middleware active")
-				return next(c)
-			}
-		})
-
-		return e
-	}),
 	fx.Invoke(func(*trace.TracerProvider) {}),
 )
 

@@ -7,6 +7,7 @@ import (
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/fx"
 	"strings"
 )
@@ -27,29 +28,31 @@ type FxHttpServerParam struct {
 }
 
 func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
+	// echo init
 	e := echo.New()
-
 	e.HideBanner = true
 	e.Logger = p.Logger
 
+	// middlewares
 	e.Use(middleware.RequestID())
+	e.Use(otelecho.Middleware(p.Config.AppConfig.Name))
 	e.Use(fxlogger.Middleware(fxlogger.Config{
 		Logger:      p.Logger,
 		HandleError: true,
 	}))
 
+	// handlers
 	for _, h := range p.Handlers {
 		e.Add(strings.ToUpper(h.Method()), h.Path(), h.Handler(), h.Middlewares()...)
 	}
 
+	// lifecycles
 	p.LifeCycle.Append(fx.Hook{
-		// start
 		OnStart: func(ctx context.Context) error {
 			go e.Start(fmt.Sprintf(":%d", p.Config.AppConfig.Port))
 			return nil
 
 		},
-		// stop
 		OnStop: func(ctx context.Context) error {
 			return e.Shutdown(ctx)
 		},
