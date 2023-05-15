@@ -34,9 +34,11 @@ func (h *TestHandler) Handler() echo.HandlerFunc {
 
 		name := c.Param("name")
 
+		// example logging
 		c.Logger().Infof("called %s with name=%s", c.Path(), name)
 		fxhttpserver.GetCtxLogger(c).Info().Msg("fxhttpserver.GetLogger")
 
+		// example tracing
 		_, span := fxhttpserver.GetCtxTracer(c).Start(c.Request().Context(), "some span")
 		defer span.End()
 

@@ -31,7 +31,6 @@ func NewFxTracer(p FxTracerParam) (*trace.TracerProvider, error) {
 	}
 
 	p.LifeCycle.Append(fx.Hook{
-		// stop
 		OnStop: func(ctx context.Context) error {
 			if err := tp.Shutdown(ctx); err != nil {
 				p.Logger.Errorf("error shutting down tracer provider: %v", err)
