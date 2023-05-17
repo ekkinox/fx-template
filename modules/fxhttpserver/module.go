@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
+	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/ekkinox/fx-template/modules/fxtracer"
 	"github.com/labstack/echo/v4"
@@ -20,6 +21,7 @@ var FxHttpServerModule = fx.Module("http-server",
 	fxconfig.FxConfigModule,
 	fxlogger.FxLoggerModule,
 	fxtracer.FxTracerModule,
+	fxhealthchecker.FxHealthCheckerModule,
 	// http server
 	fx.Provide(
 		NewFxHttpServer,
@@ -29,12 +31,13 @@ var FxHttpServerModule = fx.Module("http-server",
 
 type FxHttpServerParam struct {
 	fx.In
-	LifeCycle   fx.Lifecycle
-	Config      *fxconfig.Config
-	Logger      *fxlogger.Logger
-	Handlers    []Handler    `group:"http-server-handlers"`
-	Middlewares []Middleware `group:"http-server-middlewares"`
-	Routes      []Route      `group:"http-server-routes"`
+	LifeCycle    fx.Lifecycle
+	Config       *fxconfig.Config
+	Logger       *fxlogger.Logger
+	HeathChecker *fxhealthchecker.Checker
+	Handlers     []Handler    `group:"http-server-handlers"`
+	Middlewares  []Middleware `group:"http-server-middlewares"`
+	Routes       []Route      `group:"http-server-routes"`
 }
 
 func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
@@ -111,6 +114,18 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 			return c.JSON(http.StatusOK, map[string]string{"version": "0.1.0"})
 		})
 	}
+
+	// health check
+	e.GET("/_health", func(c echo.Context) error {
+		r := p.HeathChecker.Run()
+
+		status := http.StatusOK
+		if !r.Success {
+			status = http.StatusInternalServerError
+		}
+
+		return c.JSON(status, r)
+	})
 
 	// lifecycles
 	p.LifeCycle.Append(fx.Hook{
