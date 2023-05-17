@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+var FxEventLogger = func(log *Logger) fxevent.Logger {
+	return log
+}
+
 func (l *Logger) LogEvent(event fxevent.Event) {
 	switch e := event.(type) {
 	case *fxevent.OnStartExecuting:

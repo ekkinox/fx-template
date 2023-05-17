@@ -5,8 +5,8 @@ go 1.20
 require (
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/labstack/gommon v0.4.0
-	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.29.1
+	github.com/samber/lo v1.38.1
 	github.com/spf13/viper v1.15.0
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.41.1
 	go.opentelemetry.io/otel v1.15.1
@@ -46,6 +46,7 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.9.0 // indirect

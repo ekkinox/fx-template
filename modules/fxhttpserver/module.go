@@ -29,11 +29,12 @@ var FxHttpServerModule = fx.Module("http-server",
 
 type FxHttpServerParam struct {
 	fx.In
-	LifeCycle fx.Lifecycle
-	Config    *fxconfig.Config
-	Logger    *fxlogger.Logger
-	Handlers  []Handler `group:"http-server-handlers"`
-	Routes    []Route   `group:"http-server-routes"`
+	LifeCycle   fx.Lifecycle
+	Config      *fxconfig.Config
+	Logger      *fxlogger.Logger
+	Handlers    []Handler    `group:"http-server-handlers"`
+	Middlewares []Middleware `group:"http-server-middlewares"`
+	Routes      []Route      `group:"http-server-routes"`
 }
 
 func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
@@ -44,6 +45,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	e.Logger = p.Logger
 
 	// middlewares
+	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
 	e.Use(otelecho.Middleware(p.Config.AppConfig.Name))
 	e.Use(fxlogger.Middleware(fxlogger.Config{
@@ -62,13 +64,32 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	// handlers
 	for _, h := range p.Handlers {
 
-		r, err := getRouteForHandler(p.Routes, reflect.TypeOf(h).String())
+		t := reflect.TypeOf(h).String()
+
+		r, err := findRouteForHandler(p.Routes, t)
+
+		fmt.Printf("\nroute: %+v\n", r)
 		if err != nil {
 			p.Logger.Error("cannot register handler")
 		}
 
-		e.Add(strings.ToUpper(r.Method()), r.Path(), h.Handle())
-		p.Logger.Infof("registered handler for %s %s", r.Method(), r.Path())
+		mm := map[string]echo.MiddlewareFunc{}
+		for _, rmt := range r.Middlewares() {
+			for _, pm := range p.Middlewares {
+				pmt := reflect.TypeOf(pm).String()
+				if pmt == rmt {
+					mm[pmt] = pm.Handle()
+				}
+			}
+		}
+
+		var mmm []echo.MiddlewareFunc
+		for _, vm := range mm {
+			mmm = append(mmm, vm)
+		}
+
+		e.Add(strings.ToUpper(r.Method()), r.Path(), h.Handle(), mmm...)
+		p.Logger.Infof("registered handler %s for [%s]%s", t, r.Method(), r.Path())
 	}
 
 	// debugger
@@ -77,6 +98,10 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 		// routes
 		g.GET("/routes", func(c echo.Context) error {
 			return c.JSON(http.StatusOK, e.Routes())
+		})
+		// version
+		g.GET("/version", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, map[string]string{"version": "0.1.0"})
 		})
 	}
 

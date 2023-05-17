@@ -6,25 +6,53 @@ import (
 	"reflect"
 )
 
+type Middleware interface {
+	Handle() echo.MiddlewareFunc
+}
+
 type Handler interface {
 	Handle() echo.HandlerFunc
 }
 
-func RegisterHandler(method string, path string, constructor any) fx.Option {
+func RegisterHandler(method string, path string, handler any, middlewares ...any) fx.Option {
+
+	hp := fx.Provide(
+		fx.Annotate(
+			handler,
+			fx.As(new(Handler)),
+			fx.ResultTags(`group:"http-server-handlers"`),
+		),
+	)
+
+	var mm []any
+	var mt []string
+	for _, m := range middlewares {
+		mm = append(
+			mm,
+			fx.Annotate(
+				m,
+				fx.As(new(Middleware)),
+				fx.ResultTags(`group:"http-server-middlewares"`),
+			),
+		)
+		mt = append(
+			mt,
+			reflect.TypeOf(m).Out(0).String(),
+		)
+	}
+	mp := fx.Provide(mm...)
+
+	rp := fx.Supply(
+		fx.Annotate(
+			newRoute(method, path, reflect.TypeOf(handler).Out(0).String(), mt...),
+			fx.As(new(Route)),
+			fx.ResultTags(`group:"http-server-routes"`),
+		),
+	)
+
 	return fx.Options(
-		fx.Provide(
-			fx.Annotate(
-				constructor,
-				fx.As(new(Handler)),
-				fx.ResultTags(`group:"http-server-handlers"`),
-			),
-		),
-		fx.Supply(
-			fx.Annotate(
-				newRoute(reflect.TypeOf(constructor).Out(0).String(), method, path),
-				fx.As(new(Route)),
-				fx.ResultTags(`group:"http-server-routes"`),
-			),
-		),
+		hp,
+		mp,
+		rp,
 	)
 }
