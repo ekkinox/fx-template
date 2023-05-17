@@ -1,10 +1,13 @@
 package fxhealthchecker
 
-import "go.uber.org/fx"
+import (
+	"context"
+	"go.uber.org/fx"
+)
 
 type Probe interface {
 	Name() string
-	Check() *ProbeResult
+	Check(ctx context.Context) *ProbeResult
 }
 
 type ProbeResult struct {

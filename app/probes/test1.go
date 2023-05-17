@@ -1,6 +1,7 @@
 package probes
 
 import (
+	"context"
 	"fmt"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
@@ -20,7 +21,7 @@ func (p *Test1Probe) Name() string {
 	return "probe1"
 }
 
-func (p *Test1Probe) Check() *fxhealthchecker.ProbeResult {
+func (p *Test1Probe) Check(ctx context.Context) *fxhealthchecker.ProbeResult {
 	return fxhealthchecker.NewProbeResult(
 		false,
 		fmt.Sprintf("error test probe 1 - %s", p.config.AppConfig.Name),

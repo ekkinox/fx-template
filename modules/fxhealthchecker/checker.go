@@ -1,5 +1,7 @@
 package fxhealthchecker
 
+import "context"
+
 type CheckerResult struct {
 	Success       bool                    `json:"success"`
 	ProbesResults map[string]*ProbeResult `json:"results"`
@@ -21,14 +23,14 @@ func (c *Checker) AddProbe(p Probe) *Checker {
 	return c
 }
 
-func (c *Checker) Run() *CheckerResult {
+func (c *Checker) Run(ctx context.Context) *CheckerResult {
 
 	success := true
 	probeResults := map[string]*ProbeResult{}
 
 	for _, p := range c.probes {
 
-		pr := p.Check()
+		pr := p.Check(ctx)
 
 		success = success && pr.Success
 		probeResults[p.Name()] = pr

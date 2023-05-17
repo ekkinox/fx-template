@@ -117,7 +117,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 
 	// health check
 	e.GET("/_health", func(c echo.Context) error {
-		r := p.HeathChecker.Run()
+		r := p.HeathChecker.Run(c.Request().Context())
 
 		status := http.StatusOK
 		if !r.Success {
