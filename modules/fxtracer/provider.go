@@ -2,7 +2,6 @@ package fxtracer
 
 import (
 	"context"
-	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"time"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
@@ -10,6 +9,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -58,12 +58,13 @@ func NewTracerProvider(config *fxconfig.Config, logger *fxlogger.Logger) (*trace
 
 		bsp = trace.NewBatchSpanProcessor(traceExporter)
 	} else {
-		//exporter, err := stdout.New(stdout.WithPrettyPrint())
-		//if err != nil {
-		//	return nil, err
-		//}
+		exporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
+		if err != nil {
+			return nil, err
+		}
+		bsp = trace.NewBatchSpanProcessor(exporter)
 
-		bsp = trace.NewBatchSpanProcessor(tracetest.NewNoopExporter())
+		//bsp = trace.NewBatchSpanProcessor(tracetest.NewNoopExporter())
 	}
 
 	tracerProvider := trace.NewTracerProvider(

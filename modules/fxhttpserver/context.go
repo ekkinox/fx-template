@@ -1,6 +1,7 @@
 package fxhttpserver
 
 import (
+	"github.com/ekkinox/fx-template/modules/fxtracer"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"go.opentelemetry.io/otel"
@@ -13,11 +14,16 @@ func GetCtxLogger(ctx echo.Context) *zerolog.Logger {
 	return zerolog.Ctx(ctx.Request().Context())
 }
 
-func GetCtxTracer(ctx echo.Context) trace.Tracer {
-	t := ctx.Get(tracerKey)
-	if t != nil {
-		return ctx.Get(tracerKey).(trace.Tracer)
+func GetCtxTracer(ctx echo.Context) *fxtracer.Tracer {
+
+	ct := ctx.Get(tracerKey)
+
+	var t trace.Tracer
+	if ct != nil {
+		t = ctx.Get(tracerKey).(trace.Tracer)
+	} else {
+		t = otel.Tracer("default")
 	}
 
-	return otel.Tracer("default")
+	return fxtracer.NewTracer(t, ctx.Request().Context())
 }

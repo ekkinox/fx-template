@@ -27,8 +27,11 @@ func (h *FooHandler) Handle() echo.HandlerFunc {
 		fxhttpserver.GetCtxLogger(c).Info().Msg("fxhttpserver.GetLogger")
 
 		// example tracing
-		_, span := fxhttpserver.GetCtxTracer(c).Start(c.Request().Context(), "some span")
+		_, span := fxhttpserver.GetCtxTracer(c).Start("some span")
 		defer span.End()
+
+		_, span2 := fxhttpserver.GetCtxTracer(c).Start("some span 2")
+		defer span2.End()
 
 		output, err := h.service.Test(c)
 		if err != nil {
