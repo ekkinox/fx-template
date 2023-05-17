@@ -62,34 +62,41 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	}*/
 
 	// handlers
-	for _, h := range p.Handlers {
+	for _, handler := range p.Handlers {
 
-		t := reflect.TypeOf(h).String()
-
-		r, err := findRouteForHandler(p.Routes, t)
-
-		fmt.Printf("\nroute: %+v\n", r)
+		handlerType := reflect.TypeOf(handler).String()
+		handlerRoute, err := findRouteForHandlerType(p.Routes, handlerType)
 		if err != nil {
 			p.Logger.Error("cannot register handler")
 		}
 
-		mm := map[string]echo.MiddlewareFunc{}
-		for _, rmt := range r.Middlewares() {
+		fmt.Printf("\nroute: %+v\n", handlerRoute)
+
+		middlewaresRawMap := map[string]echo.MiddlewareFunc{}
+		for _, rmt := range handlerRoute.MiddlewareTypes() {
 			for _, pm := range p.Middlewares {
 				pmt := reflect.TypeOf(pm).String()
 				if pmt == rmt {
-					mm[pmt] = pm.Handle()
+					middlewaresRawMap[pmt] = pm.Handle()
 				}
 			}
 		}
 
-		var mmm []echo.MiddlewareFunc
-		for _, vm := range mm {
-			mmm = append(mmm, vm)
+		var middlewaresCleanSlice []echo.MiddlewareFunc
+		for _, vm := range middlewaresRawMap {
+			middlewaresCleanSlice = append(middlewaresCleanSlice, vm)
 		}
+		middlewaresCleanSlice = append(middlewaresCleanSlice, handlerRoute.MiddlewareInstances()...)
+		middlewaresCleanSlice = append(middlewaresCleanSlice, middleware.AddTrailingSlash())
 
-		e.Add(strings.ToUpper(r.Method()), r.Path(), h.Handle(), mmm...)
-		p.Logger.Infof("registered handler %s for [%s]%s", t, r.Method(), r.Path())
+		e.Add(
+			strings.ToUpper(handlerRoute.Method()),
+			handlerRoute.Path(),
+			handler.Handle(),
+			middlewaresCleanSlice...,
+		)
+
+		p.Logger.Infof("registering handler type %s for [%s]%s", handlerType, handlerRoute.Method(), handlerRoute.Path())
 	}
 
 	// debugger
