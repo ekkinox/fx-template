@@ -7,7 +7,8 @@ import (
 )
 
 func RegisterHandlers() fx.Option {
-	return fx.Provide(
-		fxhttpserver.AsHttpServerHandler(handlers.NewHelloHandler),
+	return fx.Options(
+		fxhttpserver.RegisterHandler("GET", "/foo", handlers.NewFooHandler),
+		fxhttpserver.RegisterHandler("GET", "/bar", handlers.NewBarHandler),
 	)
 }

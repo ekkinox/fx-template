@@ -118,7 +118,7 @@ func Middleware(config Config) echo.MiddlewareFunc {
 			if err != nil {
 				mainEvt = logger.log.Err(err)
 			} else {
-				mainEvt = logger.log.WithLevel(logger.log.GetLevel())
+				mainEvt = logger.log.Info()
 			}
 
 			mainEvt.Int("status", res.Status)
