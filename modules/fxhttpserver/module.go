@@ -90,7 +90,6 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 			middlewaresCleanSlice = append(middlewaresCleanSlice, vm)
 		}
 		middlewaresCleanSlice = append(middlewaresCleanSlice, handlerRoute.MiddlewareInstances()...)
-		middlewaresCleanSlice = append(middlewaresCleanSlice, middleware.AddTrailingSlash())
 
 		e.Add(
 			strings.ToUpper(handlerRoute.Method()),
