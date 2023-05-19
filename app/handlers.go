@@ -11,7 +11,7 @@ import (
 )
 
 var adminHandlersGroup = fxhttpserver.NewHandlersGroupRegistration(
-	"admin",
+	"/admin",
 	[]*fxhttpserver.HandlerRegistration{
 		fxhttpserver.NewHandlerRegistration("GET", "/foo", handlers.NewFooHandler),
 		fxhttpserver.NewHandlerRegistration("GET", "/bar", handlers.NewBarHandler),

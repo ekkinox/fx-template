@@ -70,9 +70,9 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 				h.Handler(),
 				h.Middlewares()...,
 			)
-			p.Logger.Infof("registering handler %T for [%s]%s", h.Handler(), h.Method(), h.Path())
+			p.Logger.Infof("registering handler in group for [%s]%s%s", h.Method(), g.Prefix(), h.Path())
 		}
-		p.Logger.Infof("registering handlers group for prefix %s", g.Prefix())
+		p.Logger.Infof("registered handlers group for prefix %s", g.Prefix())
 	}
 
 	// handlers
@@ -90,7 +90,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 			h.Middlewares()...,
 		)
 
-		p.Logger.Infof("registering handler %T for [%s]%s", h.Handler(), h.Method(), h.Path())
+		p.Logger.Infof("registered handler for [%s]%s", h.Method(), h.Path())
 	}
 
 	// debugger
