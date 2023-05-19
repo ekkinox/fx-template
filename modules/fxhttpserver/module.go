@@ -12,7 +12,6 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/fx"
 	"net/http"
-	"reflect"
 	"strings"
 )
 
@@ -24,8 +23,10 @@ var FxHttpServerModule = fx.Module("http-server",
 	fxhealthchecker.FxHealthCheckerModule,
 	// http server
 	fx.Provide(
+		NewFxRouter,
 		NewFxHttpServer,
 	),
+	fx.Invoke(func(*Router) {}),
 	fx.Invoke(func(*echo.Echo) {}),
 )
 
@@ -35,9 +36,7 @@ type FxHttpServerParam struct {
 	Config       *fxconfig.Config
 	Logger       *fxlogger.Logger
 	HeathChecker *fxhealthchecker.Checker
-	Handlers     []Handler    `group:"http-server-handlers"`
-	Middlewares  []Middleware `group:"http-server-middlewares"`
-	Routes       []Route      `group:"http-server-routes"`
+	Router       *Router
 }
 
 func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
@@ -65,40 +64,21 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	}*/
 
 	// handlers
-	for _, handler := range p.Handlers {
+	resolvedHandlers, err := p.Router.ResolveHandlers()
+	if err != nil {
+		p.Logger.Error("cannot register handlers: %v", err)
+	}
 
-		handlerType := reflect.TypeOf(handler).String()
-		handlerRoute, err := findRouteForHandlerType(p.Routes, handlerType)
-		if err != nil {
-			p.Logger.Error("cannot register handler")
-		}
-
-		fmt.Printf("\nroute: %+v\n", handlerRoute)
-
-		middlewaresRawMap := map[string]echo.MiddlewareFunc{}
-		for _, rmt := range handlerRoute.MiddlewareTypes() {
-			for _, pm := range p.Middlewares {
-				pmt := reflect.TypeOf(pm).String()
-				if pmt == rmt {
-					middlewaresRawMap[pmt] = pm.Handle()
-				}
-			}
-		}
-
-		var middlewaresCleanSlice []echo.MiddlewareFunc
-		for _, vm := range middlewaresRawMap {
-			middlewaresCleanSlice = append(middlewaresCleanSlice, vm)
-		}
-		middlewaresCleanSlice = append(middlewaresCleanSlice, handlerRoute.MiddlewareInstances()...)
+	for _, h := range resolvedHandlers {
 
 		e.Add(
-			strings.ToUpper(handlerRoute.Method()),
-			handlerRoute.Path(),
-			handler.Handle(),
-			middlewaresCleanSlice...,
+			strings.ToUpper(h.Method()),
+			h.Path(),
+			h.Handler(),
+			h.Middlewares()...,
 		)
 
-		p.Logger.Infof("registering handler type %s for [%s]%s", handlerType, handlerRoute.Method(), handlerRoute.Path())
+		p.Logger.Infof("registering handler %T for [%s]%s", h.Handler(), h.Method(), h.Path())
 	}
 
 	// debugger
