@@ -55,18 +55,30 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 		HandleError: true,
 	}))
 
-	// handlers groups
-	/*	for _, hg := range p.HandlersGroups {
-		g := e.Group(hg.Prefix(), hg.Middlewares()...)
-		for _, h := range hg.Handlers() {
-			g.Add(strings.ToUpper(h.Method()), h.Path(), h.Handler(), h.Middlewares()...)
+	// groups
+	resolvedHandlersGroups, err := p.Router.ResolveHandlersGroups()
+	if err != nil {
+		p.Logger.Error("cannot resolve router handlers groups: %v", err)
+	}
+
+	for _, g := range resolvedHandlersGroups {
+		group := e.Group(g.Prefix(), g.Middlewares()...)
+		for _, h := range g.Handlers() {
+			group.Add(
+				strings.ToUpper(h.Method()),
+				h.Path(),
+				h.Handler(),
+				h.Middlewares()...,
+			)
+			p.Logger.Infof("registering handler %T for [%s]%s", h.Handler(), h.Method(), h.Path())
 		}
-	}*/
+		p.Logger.Infof("registering handlers group for prefix %s", g.Prefix())
+	}
 
 	// handlers
 	resolvedHandlers, err := p.Router.ResolveHandlers()
 	if err != nil {
-		p.Logger.Error("cannot register handlers: %v", err)
+		p.Logger.Error("cannot resolve router handlers: %v", err)
 	}
 
 	for _, h := range resolvedHandlers {

@@ -16,26 +16,29 @@ type Handler interface {
 }
 
 type Router struct {
-	handlers              []Handler
-	handlerDefinitions    []HandlerDefinition
-	middlewares           []Middleware
-	middlewareDefinitions []MiddlewareDefinition
+	middlewares              []Middleware
+	middlewareDefinitions    []MiddlewareDefinition
+	handlers                 []Handler
+	handlerDefinitions       []HandlerDefinition
+	handlersGroupDefinitions []HandlersGroupDefinition
 }
 
 type FxRouterParam struct {
 	fx.In
-	Handlers              []Handler              `group:"http-server-handlers"`
-	HandlerDefinitions    []HandlerDefinition    `group:"http-server-handler-definitions"`
-	Middlewares           []Middleware           `group:"http-server-middlewares"`
-	MiddlewareDefinitions []MiddlewareDefinition `group:"http-server-middleware-definitions"`
+	Middlewares              []Middleware              `group:"http-server-middlewares"`
+	MiddlewareDefinitions    []MiddlewareDefinition    `group:"http-server-middleware-definitions"`
+	Handlers                 []Handler                 `group:"http-server-handlers"`
+	HandlerDefinitions       []HandlerDefinition       `group:"http-server-handler-definitions"`
+	HandlersGroupDefinitions []HandlersGroupDefinition `group:"http-server-handlers-group-definitions"`
 }
 
 func NewFxRouter(p FxRouterParam) *Router {
 	return &Router{
-		handlers:              p.Handlers,
-		handlerDefinitions:    p.HandlerDefinitions,
-		middlewares:           p.Middlewares,
-		middlewareDefinitions: p.MiddlewareDefinitions,
+		middlewares:              p.Middlewares,
+		middlewareDefinitions:    p.MiddlewareDefinitions,
+		handlers:                 p.Handlers,
+		handlerDefinitions:       p.HandlerDefinitions,
+		handlersGroupDefinitions: p.HandlersGroupDefinitions,
 	}
 }
 
@@ -89,6 +92,88 @@ func (r *Router) ResolveHandlers() ([]ResolvedHandler, error) {
 	}
 
 	return resolvedHandlers, nil
+}
+
+func (r *Router) ResolveHandlersGroups() ([]ResolvedHandlersGroup, error) {
+
+	var resolvedHandlersGroups []ResolvedHandlersGroup
+
+	for _, handlerGroupDef := range r.handlersGroupDefinitions {
+
+		var groupResolvedMiddlewares []echo.MiddlewareFunc
+		for _, middlewareDef := range handlerGroupDef.Middlewares() {
+			if middlewareDef.Concrete() {
+				groupResolvedMiddlewares = append(
+					groupResolvedMiddlewares,
+					middlewareDef.Middleware().(echo.MiddlewareFunc),
+				)
+			} else {
+				registeredMiddleware, err := r.lookupRegisteredMiddleware(middlewareDef.Middleware().(string))
+				if err != nil {
+					return nil, err
+				}
+
+				groupResolvedMiddlewares = append(groupResolvedMiddlewares, registeredMiddleware.Handle())
+			}
+		}
+
+		var groupResolvedHandlers []ResolvedHandler
+		for _, handlerDef := range handlerGroupDef.Handlers() {
+
+			var resHandler ResolvedHandler
+			var resMiddlewares []echo.MiddlewareFunc
+
+			for _, middlewareDef := range handlerDef.Middlewares() {
+				if middlewareDef.Concrete() {
+					resMiddlewares = append(
+						resMiddlewares,
+						middlewareDef.Middleware().(echo.MiddlewareFunc),
+					)
+				} else {
+					registeredMiddleware, err := r.lookupRegisteredMiddleware(middlewareDef.Middleware().(string))
+					if err != nil {
+						return nil, err
+					}
+
+					resMiddlewares = append(resMiddlewares, registeredMiddleware.Handle())
+				}
+			}
+
+			if handlerDef.Concrete() {
+				resHandler = newResolvedHandler(
+					handlerDef.Method(),
+					handlerDef.Path(),
+					handlerDef.Handler().(func(echo.Context) error),
+					resMiddlewares...,
+				)
+			} else {
+				registeredHandler, err := r.lookupRegisteredHandler(handlerDef.Handler().(string))
+				if err != nil {
+					return nil, err
+				}
+
+				resHandler = newResolvedHandler(
+					handlerDef.Method(),
+					handlerDef.Path(),
+					registeredHandler.Handle(),
+					resMiddlewares...,
+				)
+			}
+
+			groupResolvedHandlers = append(groupResolvedHandlers, resHandler)
+		}
+
+		resolvedHandlersGroups = append(
+			resolvedHandlersGroups,
+			newResolvedHandlersGroup(
+				handlerGroupDef.Prefix(),
+				groupResolvedHandlers,
+				groupResolvedMiddlewares...,
+			),
+		)
+	}
+
+	return resolvedHandlersGroups, nil
 }
 
 func (r *Router) lookupRegisteredMiddleware(middleware string) (Middleware, error) {

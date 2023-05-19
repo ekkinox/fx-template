@@ -66,3 +66,35 @@ func (d *handlerDefinition) Handler() any {
 func (d *handlerDefinition) Middlewares() []MiddlewareDefinition {
 	return d.middlewares
 }
+
+type HandlersGroupDefinition interface {
+	Prefix() string
+	Handlers() []HandlerDefinition
+	Middlewares() []MiddlewareDefinition
+}
+
+type handlersGroupDefinition struct {
+	prefix      string
+	handlers    []HandlerDefinition
+	middlewares []MiddlewareDefinition
+}
+
+func newHandlersGroupDefinition(prefix string, handlers []HandlerDefinition, middlewares []MiddlewareDefinition) *handlersGroupDefinition {
+	return &handlersGroupDefinition{
+		prefix:      prefix,
+		handlers:    handlers,
+		middlewares: middlewares,
+	}
+}
+
+func (h *handlersGroupDefinition) Prefix() string {
+	return h.prefix
+}
+
+func (h *handlersGroupDefinition) Handlers() []HandlerDefinition {
+	return h.handlers
+}
+
+func (h *handlersGroupDefinition) Middlewares() []MiddlewareDefinition {
+	return h.middlewares
+}

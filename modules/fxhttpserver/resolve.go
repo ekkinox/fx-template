@@ -40,3 +40,35 @@ func (r *resolvedHandler) Handler() echo.HandlerFunc {
 func (r *resolvedHandler) Middlewares() []echo.MiddlewareFunc {
 	return r.middlewares
 }
+
+type ResolvedHandlersGroup interface {
+	Prefix() string
+	Handlers() []ResolvedHandler
+	Middlewares() []echo.MiddlewareFunc
+}
+
+type resolvedHandlersGroup struct {
+	prefix      string
+	handlers    []ResolvedHandler
+	middlewares []echo.MiddlewareFunc
+}
+
+func newResolvedHandlersGroup(prefix string, handlers []ResolvedHandler, middlewares ...echo.MiddlewareFunc) *resolvedHandlersGroup {
+	return &resolvedHandlersGroup{
+		prefix:      prefix,
+		handlers:    handlers,
+		middlewares: middlewares,
+	}
+}
+
+func (r *resolvedHandlersGroup) Prefix() string {
+	return r.prefix
+}
+
+func (r *resolvedHandlersGroup) Handlers() []ResolvedHandler {
+	return r.handlers
+}
+
+func (r *resolvedHandlersGroup) Middlewares() []echo.MiddlewareFunc {
+	return r.middlewares
+}

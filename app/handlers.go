@@ -10,25 +10,28 @@ import (
 	"net/http"
 )
 
+var adminHandlersGroup = fxhttpserver.NewHandlersGroupRegistration(
+	"admin",
+	[]*fxhttpserver.HandlerRegistration{
+		fxhttpserver.NewHandlerRegistration("GET", "/foo", handlers.NewFooHandler),
+		fxhttpserver.NewHandlerRegistration("GET", "/bar", handlers.NewBarHandler),
+	},
+	middlewares.NewTest1Middleware,
+	middlewares.NewTest2Middleware,
+	middleware.CORS(),
+	middleware.Gzip(),
+)
+var fooHandler = fxhttpserver.NewHandlerRegistration("GET", "/foo", handlers.NewFooHandler, middlewares.NewTest1Middleware)
+var barHandler = fxhttpserver.NewHandlerRegistration("GET", "/bar", handlers.NewBarHandler, middlewares.NewTest2Middleware)
+
 func RegisterHandlers() fx.Option {
 	return fx.Options(
-		fxhttpserver.RegisterHandler(
-			"GET",
-			"/bar",
-			func(c echo.Context) error {
-				c.Logger().Info("from bar")
-				return c.JSON(http.StatusOK, "ok")
-			},
-			middleware.CORS(),
-			middlewares.NewTest2Middleware,
-		),
-		fxhttpserver.RegisterHandler(
-			"GET",
-			"/foo",
-			handlers.NewFooHandler,
-			middlewares.NewTest2Middleware,
-			middleware.Gzip(),
-			middlewares.NewTest1Middleware,
-		),
+		fxhttpserver.RegisterHandlersGroup(adminHandlersGroup),
+		fxhttpserver.RegisterHandler(fooHandler),
+		fxhttpserver.RegisterHandler(barHandler),
+		fxhttpserver.AsHandler("GET", "/baz", func(c echo.Context) error {
+			c.Logger().Info("from baz")
+			return c.JSON(http.StatusOK, "ok")
+		}),
 	)
 }
