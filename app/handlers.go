@@ -5,7 +5,6 @@ import (
 	"github.com/ekkinox/fx-template/app/middlewares"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/fx"
 	"net/http"
 )
@@ -18,8 +17,6 @@ var adminHandlersGroup = fxhttpserver.NewHandlersGroupRegistration(
 	},
 	middlewares.NewTest1Middleware,
 	middlewares.NewTest2Middleware,
-	middleware.CORS(),
-	middleware.Gzip(),
 )
 var fooHandler = fxhttpserver.NewHandlerRegistration("GET", "/foo", handlers.NewFooHandler, middlewares.NewTest1Middleware)
 var barHandler = fxhttpserver.NewHandlerRegistration("GET", "/bar", handlers.NewBarHandler, middlewares.NewTest2Middleware)

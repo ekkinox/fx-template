@@ -125,6 +125,16 @@ func (h *HandlersGroupRegistration) Middlewares() []any {
 	return h.middlewares
 }
 
+func AsHandlersGroup(prefix string, handlers []interface{}, middlewares ...any) fx.Option {
+
+	var handlersRegistrations []*HandlerRegistration
+	for _, h := range handlers {
+		handlersRegistrations = append(handlersRegistrations, h.(*HandlerRegistration))
+	}
+
+	return RegisterHandlersGroup(NewHandlersGroupRegistration(prefix, handlersRegistrations, middlewares...))
+}
+
 func RegisterHandlersGroup(handlersGroupRegistration *HandlersGroupRegistration) fx.Option {
 	var providers []any
 
