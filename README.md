@@ -20,5 +20,5 @@ make fresh                # refresh docker compose stack
 
 # tools
 make delve                # start a delve debug session
-make build name={my_name} # build an application image named my_mame
+make build name={my_img}  # build an application image named my_img
 ```
