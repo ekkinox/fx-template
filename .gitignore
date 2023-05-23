@@ -8,6 +8,7 @@
 *.dll
 *.so
 *.dylib
+tmp/
 
 # Test binary, built with `go test -c`
 *.test
@@ -21,10 +22,10 @@
 # Go workspace file
 go.work
 
-# Project related files
-.idea/
+# Local env
 .env
 go.sum
 .air.toml
-tmp/
 
+# IDEs
+.idea/
