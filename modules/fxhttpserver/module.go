@@ -84,18 +84,16 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	}
 
 	for _, h := range resolvedHandlers {
-
 		e.Add(
 			strings.ToUpper(h.Method()),
 			h.Path(),
 			h.Handler(),
 			h.Middlewares()...,
 		)
-
 		p.Logger.Infof("registered handler for [%s]%s", h.Method(), h.Path())
 	}
 
-	// debugger
+	// debuggers
 	if p.Config.AppDebug() {
 		g := e.Group("/_debug")
 		// config
@@ -112,7 +110,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 		})
 	}
 
-	// health check
+	// health checker
 	e.GET("/_health", func(c echo.Context) error {
 		r := p.HeathChecker.Run(c.Request().Context())
 
