@@ -1,38 +1,76 @@
 package fxconfig
 
-import "github.com/spf13/viper"
+import (
+	"fmt"
+	"github.com/spf13/viper"
+	"os"
+	"strings"
+)
 
 type Config struct {
-	AppConfig AppConfig
 	*viper.Viper
 }
 
-type AppConfig struct {
-	Name  string
-	Port  int
-	Debug bool
-}
+const AppEnvProd = "prod"
+const AppEnvDev = "dev"
+const AppEnvTest = "test"
 
-func NewConfig() *Config {
+const DefaultAppEnv = AppEnvProd
+const DefaultAppName = "my-app"
+const DefaultAppVersion = "unknown"
+
+func NewConfig() (*Config, error) {
 
 	v := viper.New()
 
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
-	setAppConfigDefaults(v)
-	_ = viper.ReadInConfig()
+	v.SetConfigName("config")
+	v.AddConfigPath(".")
+	v.AddConfigPath("./config")
 
-	return &Config{
-		AppConfig{
-			Name:  v.GetString("APP_NAME"),
-			Port:  v.GetInt("APP_PORT"),
-			Debug: v.GetBool("APP_DEBUG"),
-		},
-		v,
+	setDefaults(v)
+
+	if err := v.ReadInConfig(); err != nil {
+		return nil, err
 	}
+
+	v.SetConfigName(fmt.Sprintf("config.%s", FetchAppEnv()))
+	if err := v.MergeInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return nil, err
+		}
+	}
+
+	for _, key := range v.AllKeys() {
+		val := v.GetString(key)
+		if strings.Contains(val, "${") {
+			v.Set(key, os.ExpandEnv(val))
+		}
+	}
+
+	return &Config{v}, nil
 }
 
-func setAppConfigDefaults(v *viper.Viper) {
-	v.SetDefault("APP_NAME", "my-app")
-	v.SetDefault("APP_PORT", 8080)
-	v.SetDefault("APP_DEBUG", false)
+func (c *Config) AppName() string {
+	return c.GetString("app.name")
+}
+
+func (c *Config) AppEnv() string {
+	return c.GetString("app.env")
+}
+
+func (c *Config) AppVersion() bool {
+	return c.GetBool("app.version")
+}
+
+func (c *Config) AppDebug() bool {
+	return c.GetBool("app.debug")
+}
+
+func setDefaults(v *viper.Viper) {
+	v.SetDefault("app.name", DefaultAppName)
+	v.SetDefault("app.env", DefaultAppEnv)
+	v.SetDefault("app.version", DefaultAppVersion)
+	v.SetDefault("app.debug", false)
 }

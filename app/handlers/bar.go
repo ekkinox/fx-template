@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"net/http"
 
@@ -23,9 +22,9 @@ func (h *BarHandler) Handle() echo.HandlerFunc {
 
 		c.Logger().Infof("called %s", c.Path())
 
-		return c.String(
+		return c.JSON(
 			http.StatusOK,
-			fmt.Sprintf("Bar output: %s.", h.config.AppConfig.Name),
+			h.config.GetStringMap("config"),
 		)
 	}
 }

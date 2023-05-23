@@ -1,0 +1,5 @@
+app:
+  name: "go-skel"
+  version: "0.0.1"
+config:
+    foo: bar-default

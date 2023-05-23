@@ -1,14 +1,18 @@
-FROM golang:1.20-buster as builder
+## Multistage build
+FROM golang:1.20-alpine as build
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+ENV GOARCH=amd64
 
-WORKDIR /app
+WORKDIR /src
 COPY . .
+RUN go mod download
+RUN go build -o /app
 
-RUN go mod tidy && go mod download
-RUN go build -o /bin/api ./main.go
+## Multistage deploy
+FROM gcr.io/distroless/base-debian10
 
-WORKDIR /bin
-RUN rm -rf /app
+WORKDIR /
+COPY --from=build /app /app
 
-EXPOSE 8080
-
-CMD ["/bin/api"]
+ENTRYPOINT ["/app"]

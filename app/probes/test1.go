@@ -24,6 +24,6 @@ func (p *Test1Probe) Name() string {
 func (p *Test1Probe) Check(ctx context.Context) *fxhealthchecker.ProbeResult {
 	return fxhealthchecker.NewProbeResult(
 		false,
-		fmt.Sprintf("error test probe 1 - %s", p.config.AppConfig.Name),
+		fmt.Sprintf("error test probe 1 - %s", p.config.AppName()),
 	)
 }

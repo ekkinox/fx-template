@@ -18,7 +18,7 @@ func NewTest2Middleware(config *fxconfig.Config) *Test2Middleware {
 func (m *Test2Middleware) Handle() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			c.Logger().Infof("middleware 2 - %s", m.config.AppConfig.Name)
+			c.Logger().Infof("middleware 2 - %s", m.config.AppName())
 
 			return next(c)
 		}

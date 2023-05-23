@@ -30,5 +30,5 @@ func (s *TestService) Test(c echo.Context) (string, error) {
 		return "", e
 	}
 
-	return strings.ToUpper(s.config.AppConfig.Name), nil
+	return strings.ToUpper(s.config.AppName()), nil
 }

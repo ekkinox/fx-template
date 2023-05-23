@@ -8,6 +8,6 @@ var FxConfigModule = fx.Module("config",
 	),
 )
 
-func NewFxConfig() *Config {
+func NewFxConfig() (*Config, error) {
 	return NewConfig()
 }

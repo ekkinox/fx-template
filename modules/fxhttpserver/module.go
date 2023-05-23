@@ -15,6 +15,8 @@ import (
 	"strings"
 )
 
+const DefaultPort = 8080
+
 var FxHttpServerModule = fx.Module("http-server",
 	// modules dependencies
 	fxconfig.FxConfigModule,
@@ -43,13 +45,13 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	// echo
 	e := echo.New()
 	e.HideBanner = true
-	e.Debug = p.Config.AppConfig.Debug
+	e.Debug = p.Config.AppDebug()
 	e.Logger = p.Logger
 
 	// middlewares
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
-	e.Use(otelecho.Middleware(p.Config.AppConfig.Name))
+	e.Use(otelecho.Middleware(p.Config.AppName()))
 	e.Use(fxlogger.Middleware(fxlogger.Config{
 		Logger:      p.Logger,
 		HandleError: true,
@@ -94,8 +96,12 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	}
 
 	// debugger
-	if p.Config.AppConfig.Debug {
+	if p.Config.AppDebug() {
 		g := e.Group("/_debug")
+		// config
+		g.GET("/config", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, p.Config.AllSettings())
+		})
 		// routes
 		g.GET("/routes", func(c echo.Context) error {
 			return c.JSON(http.StatusOK, e.Routes())
@@ -121,7 +127,13 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	// lifecycles
 	p.LifeCycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			go e.Start(fmt.Sprintf(":%d", p.Config.AppConfig.Port))
+			port := p.Config.GetInt("app.port")
+			if port == 0 {
+				port = DefaultPort
+			}
+
+			go e.Start(fmt.Sprintf(":%d", port))
+
 			return nil
 
 		},

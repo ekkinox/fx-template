@@ -25,7 +25,7 @@ func NewTracerProvider(config *fxconfig.Config, logger *fxlogger.Logger) (*trace
 	res, err := resource.New(
 		bgCtx,
 		resource.WithAttributes(
-			semconv.ServiceNameKey.String(config.AppConfig.Name),
+			semconv.ServiceNameKey.String(config.AppName()),
 		),
 	)
 	if err != nil {

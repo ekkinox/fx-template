@@ -1,0 +1,4 @@
+app:
+  debug: true
+config:
+  foo: bar-dev
