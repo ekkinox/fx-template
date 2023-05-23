@@ -27,3 +27,6 @@ go.work
 
 # IDEs
 .idea/
+
+# Delve
+__debug_bin

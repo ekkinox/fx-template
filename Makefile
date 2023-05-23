@@ -14,3 +14,6 @@ logs:
 
 build:
 	docker build --platform linux/amd64 -t $(name) -f Dockerfile .
+
+delve:
+	docker compose exec -it app dlv debug
