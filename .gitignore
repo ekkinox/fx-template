@@ -24,7 +24,7 @@ go.work
 
 # Local env
 .env
-go.sum
+#go.sum
 .air.toml
 
 # IDEs
