@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"strings"
 
@@ -30,5 +31,5 @@ func (s *TestService) Test(c echo.Context) (string, error) {
 		return "", e
 	}
 
-	return strings.ToUpper(s.config.AppName()), nil
+	return fmt.Sprintf("app name is: %s", strings.ToUpper(s.config.AppName())), nil
 }
