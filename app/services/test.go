@@ -7,14 +7,13 @@ import (
 	"strings"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
-	"github.com/ekkinox/fx-template/modules/fxlogger"
 )
 
 type TestService struct {
 	config *fxconfig.Config
 }
 
-func NewTestService(config *fxconfig.Config, logger *fxlogger.Logger) *TestService {
+func NewTestService(config *fxconfig.Config) *TestService {
 	return &TestService{
 		config: config,
 	}
