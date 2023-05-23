@@ -4,7 +4,12 @@
 
 ## Usage
 
-This project provides a [Makefile](Makefile), offering the following commands:
+You first need to:
+```shell
+mv .env.example .env
+```
+
+Then, this project provides a [Makefile](Makefile), offering the following commands:
 
 ```shell
 make up                   # start the docker compose stack
