@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: build/dev.Dockerfile
+      dockerfile: Dockerfile-dev
     ports:
       - "8080:8080"
       - "40000:40000" # Delve debugger port
@@ -16,7 +16,6 @@ services:
       - NAME=my-app
       - PRODUCTION=false
       - PORT=8080
-      #- DATABASE_DSN=root:testtest@tcp(host.docker.internal:3306)/ankorstore # local monolith MySQL
 
 networks:
   app:
