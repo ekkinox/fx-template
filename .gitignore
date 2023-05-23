@@ -23,6 +23,7 @@ go.work
 
 # Project related files
 .idea/
+.env
 go.sum
 .air.toml
 tmp/

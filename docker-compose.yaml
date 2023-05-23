@@ -12,10 +12,8 @@ services:
       - .:/app
     networks:
       - app
-    environment:
-      - NAME=my-app
-      - PRODUCTION=false
-      - PORT=8080
+    env_file:
+      - .env
 
 networks:
   app:
