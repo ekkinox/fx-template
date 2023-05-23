@@ -15,8 +15,8 @@ Then, this project provides a [Makefile](Makefile), offering the following comma
 # app
 make up                   # start the docker compose stack
 make down                 # stop the docker compose stack
-make logs                 # stream docker compose stack logs
-make fresh                # refresh docker compose stack
+make logs                 # stream the docker compose stack logs
+make fresh                # refresh the docker compose stack
 
 # tools
 make delve                # start a delve debug session
