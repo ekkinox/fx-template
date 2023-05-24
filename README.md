@@ -19,6 +19,5 @@ make logs                 # stream the docker compose stack logs
 make fresh                # refresh the docker compose stack
 
 # tools
-make delve                # start a delve debug session
 make build name={my_img}  # build an application image named my_img
 ```
