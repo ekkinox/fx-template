@@ -1,34 +1,26 @@
 package app
 
 import (
-	"github.com/ekkinox/fx-template/app/handlers"
-	"github.com/ekkinox/fx-template/app/middlewares"
+	"github.com/ekkinox/fx-template/app/handler/post"
+	"github.com/ekkinox/fx-template/app/middleware"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
-	"github.com/labstack/echo/v4"
 	"go.uber.org/fx"
-	"net/http"
 )
-
-var adminHandlersGroup = fxhttpserver.NewHandlersGroupRegistration(
-	"/admin",
-	[]*fxhttpserver.HandlerRegistration{
-		fxhttpserver.NewHandlerRegistration("GET", "/foo", handlers.NewFooHandler),
-		fxhttpserver.NewHandlerRegistration("GET", "/bar", handlers.NewBarHandler),
-	},
-	middlewares.NewTest1Middleware,
-	middlewares.NewTest2Middleware,
-)
-var fooHandler = fxhttpserver.NewHandlerRegistration("GET", "/foo", handlers.NewFooHandler, middlewares.NewTest1Middleware)
-var barHandler = fxhttpserver.NewHandlerRegistration("GET", "/bar", handlers.NewBarHandler, middlewares.NewTest2Middleware)
 
 func RegisterHandlers() fx.Option {
 	return fx.Options(
-		fxhttpserver.RegisterHandlersGroup(adminHandlersGroup),
-		fxhttpserver.RegisterHandler(fooHandler),
-		fxhttpserver.RegisterHandler(barHandler),
-		fxhttpserver.AsHandler("GET", "/baz", func(c echo.Context) error {
-			c.Logger().Info("from baz")
-			return c.JSON(http.StatusOK, "ok")
-		}),
+		// posts
+		fxhttpserver.RegisterHandlersGroup(
+			fxhttpserver.NewHandlersGroupRegistration(
+				"/posts",
+				[]*fxhttpserver.HandlerRegistration{
+					fxhttpserver.NewHandlerRegistration("GET", "", post.NewListPostsHandler),
+					fxhttpserver.NewHandlerRegistration("POST", "", post.NewCreatePostHandler),
+					fxhttpserver.NewHandlerRegistration("GET", "/:id", post.NewGetPostHandler),
+					fxhttpserver.NewHandlerRegistration("DELETE", "/:id", post.NewDeletePostHandler),
+				},
+				middleware.NewTestMiddleware,
+			),
+		),
 	)
 }

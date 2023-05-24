@@ -1,24 +1,24 @@
-package middlewares
+package middleware
 
 import (
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/labstack/echo/v4"
 )
 
-type Test2Middleware struct {
+type TestMiddleware struct {
 	config *fxconfig.Config
 }
 
-func NewTest2Middleware(config *fxconfig.Config) *Test2Middleware {
-	return &Test2Middleware{
+func NewTestMiddleware(config *fxconfig.Config) *TestMiddleware {
+	return &TestMiddleware{
 		config: config,
 	}
 }
 
-func (m *Test2Middleware) Handle() echo.MiddlewareFunc {
+func (m *TestMiddleware) Handle() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			c.Logger().Infof("middleware 2 - %s", m.config.AppName())
+			c.Logger().Infof("test middleware for app: %s", m.config.AppName())
 
 			return next(c)
 		}

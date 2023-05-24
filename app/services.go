@@ -1,8 +1,7 @@
 package app
 
 import (
-	"github.com/ekkinox/fx-template/app/probes"
-	"github.com/ekkinox/fx-template/app/services"
+	"github.com/ekkinox/fx-template/app/repository"
 	"github.com/ekkinox/fx-template/modules/fxgorm"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"go.uber.org/fx"
@@ -10,9 +9,9 @@ import (
 
 func RegisterServices() fx.Option {
 	return fx.Provide(
-		services.NewTestService,
-		fxhealthchecker.RegisterProbe(probes.NewTest1Probe),
-		fxhealthchecker.RegisterProbe(probes.NewTest2Probe),
+		// health check probes
 		fxhealthchecker.RegisterProbe(fxgorm.NewDbProbe),
+		// repositories
+		repository.NewPostRepository,
 	)
 }

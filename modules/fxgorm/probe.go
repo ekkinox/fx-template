@@ -24,18 +24,18 @@ func (p *DbProbe) Name() string {
 func (p *DbProbe) Check(ctx context.Context) *fxhealthchecker.ProbeResult {
 
 	success := true
-	message := "db probe ping success"
+	message := "database ping success"
 
 	db, err := p.db.DB()
 	if err != nil {
 		success = false
-		message = fmt.Sprintf("db probe error: %v", err)
+		message = fmt.Sprintf("database error: %v", err)
 	}
 
 	err = db.Ping()
 	if err != nil {
 		success = false
-		message = fmt.Sprintf("db probe ping error: %v", err)
+		message = fmt.Sprintf("database ping error: %v", err)
 	}
 
 	return fxhealthchecker.NewProbeResult(success, message)
