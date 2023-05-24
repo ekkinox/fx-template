@@ -5,6 +5,8 @@ services:
     container_name: app
     build:
       dockerfile: Dockerfile-dev
+    networks:
+      - network
     ports:
       - "8080:8080"
       - "40000:40000"
@@ -12,3 +14,23 @@ services:
       - .:/app
     env_file:
       - .env
+  db:
+    container_name: db
+    image: mysql:8
+    restart: always
+    networks:
+      - network
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    env_file:
+      - .env
+volumes:
+  db_data:
+    driver: local
+networks:
+  network:
+    driver: bridge
