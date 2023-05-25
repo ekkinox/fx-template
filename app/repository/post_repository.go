@@ -51,6 +51,12 @@ func (r *PostRepository) Create(post *model.Post) error {
 	return res.Error
 }
 
+func (r *PostRepository) Update(post *model.Post, update *model.Post) error {
+	res := r.db.Model(post).Updates(update)
+
+	return res.Error
+}
+
 func (r *PostRepository) Delete(post *model.Post) error {
 	res := r.db.Delete(post)
 

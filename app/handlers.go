@@ -17,6 +17,7 @@ func RegisterHandlers() fx.Option {
 					fxhttpserver.NewHandlerRegistration("GET", "", post.NewListPostsHandler),
 					fxhttpserver.NewHandlerRegistration("POST", "", post.NewCreatePostHandler),
 					fxhttpserver.NewHandlerRegistration("GET", "/:id", post.NewGetPostHandler),
+					fxhttpserver.NewHandlerRegistration("PATCH", "/:id", post.NewUpdatePostHandler),
 					fxhttpserver.NewHandlerRegistration("DELETE", "/:id", post.NewDeletePostHandler),
 				},
 				middleware.NewTestMiddleware,
