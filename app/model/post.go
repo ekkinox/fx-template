@@ -12,4 +12,5 @@ type Post struct {
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at" form:"deleted_at"`
 	Title       string         `json:"title" form:"title"`
 	Description string         `json:"description" form:"description"`
+	Likes       int            `json:"likes" form:"likes"`
 }
