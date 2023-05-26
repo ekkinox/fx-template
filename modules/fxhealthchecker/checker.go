@@ -4,7 +4,7 @@ import "context"
 
 type CheckerResult struct {
 	Success       bool                    `json:"success"`
-	ProbesResults map[string]*ProbeResult `json:"results"`
+	ProbesResults map[string]*ProbeResult `json:"probes"`
 }
 
 type Checker struct {

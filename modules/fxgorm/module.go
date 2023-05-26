@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/fx"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -19,9 +20,10 @@ var FxGormModule = fx.Module(
 
 type FxGormParam struct {
 	fx.In
-	LifeCycle fx.Lifecycle
-	Config    *fxconfig.Config
-	Logger    *fxlogger.Logger
+	LifeCycle      fx.Lifecycle
+	Config         *fxconfig.Config
+	Logger         *fxlogger.Logger
+	TracerProvider *trace.TracerProvider
 }
 
 func NewFxGorm(p FxGormParam) (*gorm.DB, error) {
@@ -39,6 +41,13 @@ func NewFxGorm(p FxGormParam) (*gorm.DB, error) {
 	orm, err := NewGorm(p.Config.GetString("database.driver"), p.Config.GetString("database.dsn"), config)
 	if err != nil {
 		return nil, err
+	}
+
+	if p.Config.AppDebug() {
+		err = orm.Use(NewGormTracerPlugin(p.TracerProvider))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// lifecycle

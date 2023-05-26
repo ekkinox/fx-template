@@ -33,14 +33,14 @@ func NewTracerProvider(config *fxconfig.Config, logger *fxlogger.Logger) (*trace
 	}
 
 	var bsp trace.SpanProcessor
-	if config.GetBool("TRACING_ENABLED") {
+	if config.GetBool("traces.enabled") {
 
 		dialCtx, cancel := context.WithTimeout(bgCtx, 5*time.Second)
 		defer cancel()
 
 		conn, err := grpc.DialContext(
 			dialCtx,
-			config.GetString("TRACING_COLLECTOR"),
+			config.GetString("traces.collector"),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithBlock(),
 		)

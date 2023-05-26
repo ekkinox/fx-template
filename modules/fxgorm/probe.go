@@ -7,36 +7,30 @@ import (
 	"gorm.io/gorm"
 )
 
-type DbProbe struct {
+type GormProbe struct {
 	db *gorm.DB
 }
 
-func NewDbProbe(db *gorm.DB) *DbProbe {
-	return &DbProbe{
+func NewGormProbe(db *gorm.DB) *GormProbe {
+	return &GormProbe{
 		db: db,
 	}
 }
 
-func (p *DbProbe) Name() string {
-	return "database"
+func (p *GormProbe) Name() string {
+	return "gorm"
 }
 
-func (p *DbProbe) Check(ctx context.Context) *fxhealthchecker.ProbeResult {
-
-	success := true
-	message := "database ping success"
-
+func (p *GormProbe) Check(ctx context.Context) *fxhealthchecker.ProbeResult {
 	db, err := p.db.DB()
 	if err != nil {
-		success = false
-		message = fmt.Sprintf("database error: %v", err)
+		return fxhealthchecker.NewProbeResult(false, fmt.Sprintf("database error: %v", err))
 	}
 
 	err = db.Ping()
 	if err != nil {
-		success = false
-		message = fmt.Sprintf("database ping error: %v", err)
+		return fxhealthchecker.NewProbeResult(false, fmt.Sprintf("database ping error: %v", err))
 	}
 
-	return fxhealthchecker.NewProbeResult(success, message)
+	return fxhealthchecker.NewProbeResult(true, "database ping success")
 }

@@ -7,5 +7,8 @@ http:
 database:
   driver: mysql
   dsn: ${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_HOST}:${MYSQL_PORT})/${MYSQL_DATABASE}?parseTime=true
+traces:
+  enabled: ${TRACES_ENABLED}
+  collector: ${TRACES_COLLECTOR}
 config:
     foo: bar-default
