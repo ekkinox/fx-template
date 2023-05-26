@@ -2,12 +2,11 @@ package fxtracer
 
 import (
 	"context"
+	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"time"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
-	"github.com/ekkinox/fx-template/modules/fxlogger"
-
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
@@ -29,7 +28,7 @@ func NewTracerProvider(config *fxconfig.Config, logger *fxlogger.Logger) (*trace
 		),
 	)
 	if err != nil {
-		logger.Errorf("failed to create tracing resource: %v", err)
+		logger.Error().Err(err).Msg("failed to create tracing resource")
 		return nil, err
 	}
 
@@ -46,13 +45,13 @@ func NewTracerProvider(config *fxconfig.Config, logger *fxlogger.Logger) (*trace
 			grpc.WithBlock(),
 		)
 		if err != nil {
-			logger.Errorf("failed to create gRPC connection to tracing collector: %v", err)
+			logger.Error().Err(err).Msg("failed to create gRPC connection to tracing collector")
 			return nil, err
 		}
 
 		traceExporter, err := otlptracegrpc.New(dialCtx, otlptracegrpc.WithGRPCConn(conn))
 		if err != nil {
-			logger.Errorf("failed to create gRPC tracing exporter: %v", err)
+			logger.Error().Err(err).Msg("failed to create gRPC tracing exporter")
 			return nil, err
 		}
 
@@ -77,7 +76,7 @@ func NewTracerProvider(config *fxconfig.Config, logger *fxlogger.Logger) (*trace
 	otel.SetTracerProvider(tracerProvider)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 
-	logger.Debug("tracer is ready")
+	logger.Debug().Msg("tracer is ready")
 
 	return tracerProvider, nil
 }

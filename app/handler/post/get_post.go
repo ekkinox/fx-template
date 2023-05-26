@@ -4,11 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ekkinox/fx-template/app/repository"
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"net/http"
 	"strconv"
-
-	"github.com/labstack/echo/v4"
 )
 
 type GetPostHandler struct {
@@ -24,6 +23,8 @@ func NewGetPostHandler(repository *repository.PostRepository) *GetPostHandler {
 func (h *GetPostHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
+		c.Logger().Info("in get post handler")
+
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			msg := fmt.Sprintf("invalid id: %v", err)
@@ -32,7 +33,7 @@ func (h *GetPostHandler) Handle() echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, msg)
 		}
 
-		post, err := h.repository.Find(id)
+		post, err := h.repository.Find(c.Request().Context(), id)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				msg := fmt.Sprintf("cannot get post with id %d: %v", id, err)

@@ -24,6 +24,8 @@ func NewUpdatePostHandler(repository *repository.PostRepository) *UpdatePostHand
 func (h *UpdatePostHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
+		c.Logger().Info("in update post handler")
+
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			msg := fmt.Sprintf("invalid id: %v", err)
@@ -32,7 +34,7 @@ func (h *UpdatePostHandler) Handle() echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, msg)
 		}
 
-		post, err := h.repository.Find(id)
+		post, err := h.repository.Find(c.Request().Context(), id)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				msg := fmt.Sprintf("cannot get post with id %d: %v", id, err)
@@ -51,7 +53,7 @@ func (h *UpdatePostHandler) Handle() echo.HandlerFunc {
 			return err
 		}
 
-		err = h.repository.Update(post, update)
+		err = h.repository.Update(c.Request().Context(), post, update)
 		if err != nil {
 			c.Logger().Errorf("cannot update post: %v", err)
 			return err

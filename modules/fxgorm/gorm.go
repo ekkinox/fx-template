@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewGorm(driver string, dsn string) (*gorm.DB, error) {
+func NewGorm(driver string, dsn string, config gorm.Config) (*gorm.DB, error) {
 
 	var dial gorm.Dialector
 	switch GetDriver(driver) {
@@ -19,5 +19,5 @@ func NewGorm(driver string, dsn string) (*gorm.DB, error) {
 		dial = postgres.Open(dsn)
 	}
 
-	return gorm.Open(dial, &gorm.Config{})
+	return gorm.Open(dial, &config)
 }

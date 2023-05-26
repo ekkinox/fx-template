@@ -21,13 +21,15 @@ func NewCreatePostHandler(repository *repository.PostRepository) *CreatePostHand
 func (h *CreatePostHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
+		c.Logger().Info("in create post handler")
+
 		post := new(model.Post)
 		if err := c.Bind(post); err != nil {
 			c.Logger().Errorf("cannot bind post: %v", err)
 			return err
 		}
 
-		err := h.repository.Create(post)
+		err := h.repository.Create(c.Request().Context(), post)
 		if err != nil {
 			c.Logger().Errorf("cannot create post: %v", err)
 			return err

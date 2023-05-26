@@ -19,7 +19,6 @@ const DefaultPort = 8080
 
 var FxHttpServerModule = fx.Module("http-server",
 	// modules dependencies
-	fxconfig.FxConfigModule,
 	fxlogger.FxLoggerModule,
 	fxtracer.FxTracerModule,
 	fxhealthchecker.FxHealthCheckerModule,
@@ -42,25 +41,68 @@ type FxHttpServerParam struct {
 }
 
 func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
+	// logger
+	l := NewEchoLogger(p.Logger)
+
 	// echo
 	e := echo.New()
 	e.HideBanner = true
 	e.Debug = p.Config.AppDebug()
-	e.Logger = p.Logger
+	e.Logger = l
 
 	// middlewares
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
 	e.Use(otelecho.Middleware(p.Config.AppName()))
-	e.Use(fxlogger.Middleware(fxlogger.Config{
-		Logger:      p.Logger,
-		HandleError: true,
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogMethod:    true,
+		LogURI:       true,
+		LogStatus:    true,
+		LogRequestID: true,
+		LogLatency:   true,
+		LogUserAgent: true,
+		LogRemoteIP:  true,
+		LogReferer:   true,
+		BeforeNextFunc: func(c echo.Context) {
+			requestId := c.Request().Header.Get(headerRequestID)
+			if requestId == "" {
+				requestId = c.Response().Header().Get(headerRequestID)
+			}
+
+			traceParent := c.Request().Header.Get(headerTraceParent)
+			if traceParent == "" {
+				traceParent = c.Response().Header().Get(headerTraceParent)
+			}
+
+			corrLogger := l.logger.
+				With().
+				Str(headerRequestID, requestId).
+				Str(headerTraceParent, traceParent).
+				Logger()
+
+			c.SetRequest(c.Request().WithContext(corrLogger.WithContext(c.Request().Context())))
+			c.SetLogger(NewEchoLogger(fxlogger.FromLogger(corrLogger)))
+		},
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			l.logger.Info().
+				Str("method", v.Method).
+				Str("uri", v.URI).
+				Int("status", v.Status).
+				Str("latency", v.Latency.String()).
+				Str("x-request-id", v.RequestID).
+				Str("traceparent", c.Request().Header.Get(headerTraceParent)).
+				Str("remote-ip", v.RemoteIP).
+				Str("referer", v.Referer).
+				Msg("")
+
+			return nil
+		},
 	}))
 
 	// groups
 	resolvedHandlersGroups, err := p.Router.ResolveHandlersGroups()
 	if err != nil {
-		p.Logger.Error("cannot resolve router handlers groups: %v", err)
+		l.Error("cannot resolve router handlers groups: %v", err)
 	}
 
 	for _, g := range resolvedHandlersGroups {
@@ -72,15 +114,15 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 				h.Handler(),
 				h.Middlewares()...,
 			)
-			p.Logger.Infof("registering handler in group for [%s]%s%s", h.Method(), g.Prefix(), h.Path())
+			l.Debugf("registering handler in group for [%s]%s%s", h.Method(), g.Prefix(), h.Path())
 		}
-		p.Logger.Infof("registered handlers group for prefix %s", g.Prefix())
+		l.Debugf("registered handlers group for prefix %s", g.Prefix())
 	}
 
 	// handlers
 	resolvedHandlers, err := p.Router.ResolveHandlers()
 	if err != nil {
-		p.Logger.Error("cannot resolve router handlers: %v", err)
+		l.Error("cannot resolve router handlers: %v", err)
 	}
 
 	for _, h := range resolvedHandlers {
@@ -90,7 +132,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 			h.Handler(),
 			h.Middlewares()...,
 		)
-		p.Logger.Infof("registered handler for [%s]%s", h.Method(), h.Path())
+		l.Debugf("registered handler for [%s]%s", h.Method(), h.Path())
 	}
 
 	// debuggers
@@ -125,7 +167,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	// lifecycles
 	p.LifeCycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			port := p.Config.GetInt("app.port")
+			port := p.Config.GetInt("http.server.port")
 			if port == 0 {
 				port = DefaultPort
 			}

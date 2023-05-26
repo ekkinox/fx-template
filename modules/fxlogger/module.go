@@ -2,12 +2,14 @@ package fxlogger
 
 import (
 	"github.com/ekkinox/fx-template/modules/fxconfig"
-	"github.com/labstack/gommon/log"
+	"github.com/rs/zerolog"
 	"go.uber.org/fx"
-	"os"
 )
 
 var FxLoggerModule = fx.Module("logger",
+	// modules dependencies
+	fxconfig.FxConfigModule,
+	// logger
 	fx.Provide(
 		NewFxLogger,
 	),
@@ -20,14 +22,13 @@ type FxLoggerParam struct {
 
 func NewFxLogger(p FxLoggerParam) *Logger {
 
-	lvl := log.INFO
+	level := zerolog.InfoLevel
 	if p.Config.AppDebug() {
-		lvl = log.DEBUG
+		level = zerolog.DebugLevel
 	}
 
 	return NewLogger(
-		os.Stdout,
-		WithField("service", p.Config.AppName()),
-		WithLevel(lvl),
+		WithName(p.Config.AppName()),
+		WithLevel(level),
 	)
 }
