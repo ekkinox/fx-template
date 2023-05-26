@@ -6,6 +6,6 @@ http:
     port: 8080
 database:
   driver: mysql
-  dsn: ${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(db:3306)/${MYSQL_DATABASE}?parseTime=true
+  dsn: ${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_HOST}:${MYSQL_PORT})/${MYSQL_DATABASE}?parseTime=true
 config:
     foo: bar-default
