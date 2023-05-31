@@ -22,7 +22,7 @@ func NewProbeResult(success bool, message string) *ProbeResult {
 	}
 }
 
-func RegisterProbe(p any) any {
+func AsProbe(p any) any {
 	return fx.Annotate(
 		p,
 		fx.As(new(Probe)),

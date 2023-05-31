@@ -125,13 +125,7 @@ func (h *HandlersGroupRegistration) Middlewares() []any {
 	return h.middlewares
 }
 
-func AsHandlersGroup(prefix string, handlers []interface{}, middlewares ...any) fx.Option {
-
-	var handlersRegistrations []*HandlerRegistration
-	for _, h := range handlers {
-		handlersRegistrations = append(handlersRegistrations, h.(*HandlerRegistration))
-	}
-
+func AsHandlersGroup(prefix string, handlersRegistrations []*HandlerRegistration, middlewares ...any) fx.Option {
 	return RegisterHandlersGroup(NewHandlersGroupRegistration(prefix, handlersRegistrations, middlewares...))
 }
 

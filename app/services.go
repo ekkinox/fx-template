@@ -10,7 +10,7 @@ import (
 func RegisterServices() fx.Option {
 	return fx.Provide(
 		// health check probes
-		fxhealthchecker.RegisterProbe(fxgorm.NewGormProbe),
+		fxhealthchecker.AsProbe(fxgorm.NewGormProbe),
 		// repositories
 		repository.NewPostRepository,
 	)

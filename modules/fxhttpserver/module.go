@@ -33,11 +33,11 @@ var FxHttpServerModule = fx.Module("http-server",
 
 type FxHttpServerParam struct {
 	fx.In
-	LifeCycle    fx.Lifecycle
-	Config       *fxconfig.Config
-	Logger       *fxlogger.Logger
-	HeathChecker *fxhealthchecker.Checker
-	Router       *Router
+	LifeCycle fx.Lifecycle
+	Config    *fxconfig.Config
+	Logger    *fxlogger.Logger
+	Checker   *fxhealthchecker.Checker
+	Router    *Router
 }
 
 func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
@@ -154,7 +154,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 
 	// health checker
 	e.GET("/_health", func(c echo.Context) error {
-		r := p.HeathChecker.Run(c.Request().Context())
+		r := p.Checker.Run(c.Request().Context())
 
 		status := http.StatusOK
 		if !r.Success {

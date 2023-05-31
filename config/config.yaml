@@ -11,4 +11,7 @@ traces:
   enabled: ${TRACES_ENABLED}
   collector: ${TRACES_COLLECTOR}
 config:
-    foo: bar-default
+    call:
+      url: http://localhost:8080/answer
+    answer:
+      should_fail: false
