@@ -3,16 +3,20 @@ package fxhttpclient
 import (
 	"context"
 	"fmt"
-	"github.com/labstack/echo/v4"
+	"io"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+const HttpClientContextRequestKey = "_httpClientContextRequest"
+
 type HttpClient struct {
-	*http.Client
-	context context.Context
-	headers []string
+	context          context.Context
+	client           *http.Client
+	headersToForward map[string][]string
 }
 
 func NewCtxHttpClient(ctx context.Context, opts ...HttpClientOption) *HttpClient {
@@ -29,22 +33,59 @@ func NewCtxHttpClient(ctx context.Context, opts ...HttpClientOption) *HttpClient
 	}
 
 	return &HttpClient{
-		client,
-		ctx,
-		appliedOpts.Headers,
+		context:          ctx,
+		client:           client,
+		headersToForward: appliedOpts.HeadersToForward,
 	}
 }
 
 func (c *HttpClient) Do(req *http.Request) (*http.Response, error) {
 	req = req.WithContext(c.context)
 
-	c.context.(echo.Context).Logger().Info("in do !\n**********************************\n")
-	fmt.Printf("in do !\n**********************************\n")
+	fmt.Printf("in DO !\n**********************************\n")
+	fmt.Printf("ctx: %+v", c.context)
 
-	for _, h := range c.headers {
-		req.Header.Add(h, req.Header.Get(h))
-		fmt.Printf("adding header %s: %s", h, req.Header.Get(h))
+	for name, values := range c.headersToForward {
+		for _, value := range values {
+			req.Header.Add(name, value)
+		}
 	}
 
-	return c.Client.Do(req.WithContext(c.context))
+	return c.client.Do(req)
+}
+
+func (c *HttpClient) Get(url string) (resp *http.Response, err error) {
+
+	fmt.Printf("in GET !\n**********************************\n")
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.Do(req)
+}
+
+func (c *HttpClient) Head(url string) (resp *http.Response, err error) {
+	req, err := http.NewRequest("HEAD", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.Do(req)
+}
+
+func (c *HttpClient) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", contentType)
+
+	return c.Do(req)
+}
+
+func (c *HttpClient) PostForm(url string, data url.Values) (resp *http.Response, err error) {
+	return c.Post(url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()))
 }

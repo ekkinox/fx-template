@@ -16,5 +16,11 @@ func CtxTracer(ctx echo.Context) *fxtracer.Tracer {
 }
 
 func CtxHttpClient(ctx echo.Context, opts ...fxhttpclient.HttpClientOption) *fxhttpclient.HttpClient {
+
+	opts = append(
+		opts,
+		fxhttpclient.WithRequestHeadersToForward(ctx.Request(), fxhttpclient.DefaultHeadersToForward),
+	)
+
 	return fxhttpclient.NewCtxHttpClient(ctx.Request().Context(), opts...)
 }
