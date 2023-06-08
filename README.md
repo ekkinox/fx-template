@@ -4,9 +4,9 @@
 
 ## Usage
 
-You first need to:
+You first need to copy and adapt the `.env` file:
 ```shell
-mv .env.example .env
+cp .env.example .env
 ```
 
 Then, this project provides a [Makefile](Makefile), offering the following commands:
