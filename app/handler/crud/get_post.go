@@ -1,30 +1,30 @@
-package post
+package crud
 
 import (
 	"errors"
 	"fmt"
-	"github.com/ekkinox/fx-template/app/repository"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 
+	"github.com/ekkinox/fx-template/app/repository"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
-type DeletePostHandler struct {
+type GetPostHandler struct {
 	repository *repository.PostRepository
 }
 
-func NewDeletePostHandler(repository *repository.PostRepository) *DeletePostHandler {
-	return &DeletePostHandler{
+func NewGetPostHandler(repository *repository.PostRepository) *GetPostHandler {
+	return &GetPostHandler{
 		repository: repository,
 	}
 }
 
-func (h *DeletePostHandler) Handle() echo.HandlerFunc {
+func (h *GetPostHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		c.Logger().Info("in delete post handler")
+		c.Logger().Info("in get post handler")
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
@@ -47,12 +47,6 @@ func (h *DeletePostHandler) Handle() echo.HandlerFunc {
 			return err
 		}
 
-		err = h.repository.Delete(c.Request().Context(), post)
-		if err != nil {
-			c.Logger().Errorf("cannot delete post: %v", err)
-			return err
-		}
-
-		return c.NoContent(http.StatusNoContent)
+		return c.JSON(http.StatusOK, post)
 	}
 }

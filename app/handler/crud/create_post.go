@@ -1,9 +1,10 @@
-package post
+package crud
 
 import (
+	"net/http"
+
 	"github.com/ekkinox/fx-template/app/model"
 	"github.com/ekkinox/fx-template/app/repository"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )

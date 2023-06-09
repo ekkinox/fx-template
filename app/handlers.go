@@ -1,8 +1,9 @@
 package app
 
 import (
-	"github.com/ekkinox/fx-template/app/handler"
-	"github.com/ekkinox/fx-template/app/handler/post"
+	"github.com/ekkinox/fx-template/app/handler/crud"
+	"github.com/ekkinox/fx-template/app/handler/http"
+	"github.com/ekkinox/fx-template/app/handler/pubsub"
 	"github.com/ekkinox/fx-template/app/middleware"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
 	"go.uber.org/fx"
@@ -10,19 +11,21 @@ import (
 
 func RegisterHandlers() fx.Option {
 	return fx.Options(
-		// answer
-		fxhttpserver.AsHandler("GET", "/call", handler.NewCallHandler),
-		// answer
-		fxhttpserver.AsHandler("GET", "/answer", handler.NewAnswerHandler),
-		// posts group
+		// http
+		fxhttpserver.AsHandler("GET", "/http/ping", http.NewPingHandler),
+		fxhttpserver.AsHandler("GET", "/http/pong", http.NewPongHandler),
+		// pubsub
+		fxhttpserver.AsHandler("GET", "/pubsub/publish", pubsub.NewPublishHandler),
+		fxhttpserver.AsHandler("GET", "/pubsub/subscribe", pubsub.NewSubscribeHandler),
+		// crud
 		fxhttpserver.AsHandlersGroup(
-			"/posts",
+			"/crud/posts",
 			[]*fxhttpserver.HandlerRegistration{
-				fxhttpserver.NewHandlerRegistration("GET", "", post.NewListPostsHandler),
-				fxhttpserver.NewHandlerRegistration("POST", "", post.NewCreatePostHandler),
-				fxhttpserver.NewHandlerRegistration("GET", "/:id", post.NewGetPostHandler),
-				fxhttpserver.NewHandlerRegistration("PATCH", "/:id", post.NewUpdatePostHandler),
-				fxhttpserver.NewHandlerRegistration("DELETE", "/:id", post.NewDeletePostHandler),
+				fxhttpserver.NewHandlerRegistration("GET", "", crud.NewListPostsHandler),
+				fxhttpserver.NewHandlerRegistration("POST", "", crud.NewCreatePostHandler),
+				fxhttpserver.NewHandlerRegistration("GET", "/:id", crud.NewGetPostHandler),
+				fxhttpserver.NewHandlerRegistration("PATCH", "/:id", crud.NewUpdatePostHandler),
+				fxhttpserver.NewHandlerRegistration("DELETE", "/:id", crud.NewDeletePostHandler),
 			},
 			middleware.NewTestMiddleware,
 		),

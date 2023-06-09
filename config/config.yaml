@@ -10,8 +10,13 @@ database:
 traces:
   enabled: ${TRACES_ENABLED}
   collector: ${TRACES_COLLECTOR}
+pubsub:
+  topics:
+    test:  test-topic
+  subscriptions:
+    test:  test-subscription
 config:
-    call:
-      url: http://localhost:8080/answer
-    answer:
+    ping:
+      url: http://localhost:8080/http/pong
+    pong:
       should_fail: false

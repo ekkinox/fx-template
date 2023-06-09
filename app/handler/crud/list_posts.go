@@ -1,9 +1,10 @@
-package post
+package crud
 
 import (
+	"net/http"
+
 	"github.com/ekkinox/fx-template/app/repository"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 type ListPostsHandler struct {

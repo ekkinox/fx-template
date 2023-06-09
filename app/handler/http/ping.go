@@ -1,32 +1,32 @@
-package handler
+package http
 
 import (
+	"io"
+
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
-	"io"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-type CallHandler struct {
+type PingHandler struct {
 	config *fxconfig.Config
 }
 
-func NewCallHandler(config *fxconfig.Config) *CallHandler {
-	return &CallHandler{
+func NewPingHandler(config *fxconfig.Config) *PingHandler {
+	return &PingHandler{
 		config: config,
 	}
 }
 
-func (h *CallHandler) Handle() echo.HandlerFunc {
+func (h *PingHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		client := fxhttpserver.CtxHttpClient(c)
 
-		res, err := client.Get(h.config.GetString("config.call.url"))
+		res, err := client.Get(h.config.GetString("config.ping.url"))
 		if err != nil {
-			c.Logger().Errorf("cannot call target: %v", err)
+			c.Logger().Errorf("cannot request target: %v", err)
 			return err
 		}
 
@@ -37,6 +37,6 @@ func (h *CallHandler) Handle() echo.HandlerFunc {
 			return err
 		}
 
-		return c.String(http.StatusOK, string(body))
+		return c.String(res.StatusCode, string(body))
 	}
 }

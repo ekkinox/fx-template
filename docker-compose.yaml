@@ -28,9 +28,24 @@ services:
       - db_data:/var/lib/mysql
     env_file:
       - .env
+  pubsub:
+    container_name: pubsub
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:434.0.0-emulators
+    command: "gcloud beta emulators pubsub start --host-port=0.0.0.0:8085"
+    restart: always
+    networks:
+      - network
+    ports:
+      - "8085:8085"
+    expose:
+      - "8085"
+    env_file:
+      - .env
+
 volumes:
   db_data:
     driver: local
+
 networks:
   network:
     driver: bridge

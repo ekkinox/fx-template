@@ -3,6 +3,9 @@ package fxhttpserver
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
@@ -11,8 +14,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/fx"
-	"net/http"
-	"strings"
 )
 
 const DefaultPort = 8080
@@ -49,6 +50,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	e.HideBanner = true
 	e.Debug = p.Config.AppDebug()
 	e.Logger = l
+	e.HTTPErrorHandler = NewHttpServerErrorHandler(p.Config)
 
 	// middlewares
 	e.Use(middleware.Recover())
@@ -63,6 +65,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 		LogUserAgent: true,
 		LogRemoteIP:  true,
 		LogReferer:   true,
+		LogError:     true,
 		BeforeNextFunc: func(c echo.Context) {
 			requestId := c.Request().Header.Get(headerRequestID)
 			if requestId == "" {
@@ -84,7 +87,12 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 			c.SetLogger(NewEchoLogger(fxlogger.FromLogger(corrLogger)))
 		},
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			l.logger.Info().
+			evt := l.logger.Info()
+			if v.Error != nil {
+				evt = l.logger.Error().Err(v.Error)
+			}
+
+			evt.
 				Str("method", v.Method).
 				Str("uri", v.URI).
 				Int("status", v.Status).
