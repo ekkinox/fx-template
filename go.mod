@@ -8,6 +8,7 @@ require (
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/labstack/gommon v0.4.0
 	github.com/rs/zerolog v1.29.1
+	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.41.1
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.42.0
@@ -42,6 +43,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.3.1 // indirect

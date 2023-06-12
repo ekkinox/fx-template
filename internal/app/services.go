@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/ekkinox/fx-template/app/repository"
+	"github.com/ekkinox/fx-template/internal/app/repository"
 	"github.com/ekkinox/fx-template/modules/fxgorm"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"go.uber.org/fx"

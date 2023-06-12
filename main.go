@@ -1,7 +1,9 @@
 package main
 
-import "github.com/ekkinox/fx-template/app"
+import (
+	"github.com/ekkinox/fx-template/cmd"
+)
 
 func main() {
-	app.App.Run()
+	cmd.Execute()
 }

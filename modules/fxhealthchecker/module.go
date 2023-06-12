@@ -4,8 +4,7 @@ import (
 	"go.uber.org/fx"
 )
 
-var FxHealthCheckerModule = fx.Module(
-	"health-checker",
+var FxHealthCheckerModule = fx.Module("health-checker",
 	fx.Provide(
 		NewFxHealthChecker,
 	),

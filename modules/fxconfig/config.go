@@ -2,9 +2,10 @@ package fxconfig
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"os"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 type Config struct {
@@ -27,7 +28,7 @@ func NewConfig() (*Config, error) {
 	v.AutomaticEnv()
 	v.SetConfigName("config")
 	v.AddConfigPath(".")
-	v.AddConfigPath("./config")
+	v.AddConfigPath("./configs")
 
 	setDefaults(v)
 
@@ -60,8 +61,8 @@ func (c *Config) AppEnv() string {
 	return c.GetString("app.env")
 }
 
-func (c *Config) AppVersion() bool {
-	return c.GetBool("app.version")
+func (c *Config) AppVersion() string {
+	return c.GetString("app.version")
 }
 
 func (c *Config) AppDebug() bool {

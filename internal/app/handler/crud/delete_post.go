@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ekkinox/fx-template/app/repository"
+	"github.com/ekkinox/fx-template/internal/app/repository"
 	"gorm.io/gorm"
 
 	"github.com/labstack/echo/v4"

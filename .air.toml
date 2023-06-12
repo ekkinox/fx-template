@@ -1,14 +1,14 @@
 root = "."
 testdata_dir = "testdata"
-tmp_dir = "tmp"
+tmp_dir = "build"
 
 [build]
   args_bin = []
-  bin = "./tmp/main"
-  #full_bin = "dlv --listen=:40000 --headless=true --api-version=2 --accept-multiclient exec ./tmp/main"
-  cmd = "go build -gcflags='all=-N -l' -o ./tmp/main ."
+  bin = "./build/main"
+  #full_bin = "dlv --listen=:40000 --headless=true --api-version=2 --accept-multiclient exec ./build/main"
+  cmd = "go build -gcflags='all=-N -l' -o ./build/main ."
   delay = 0
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  exclude_dir = ["assets", "build", "vendor", "testdata"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false

@@ -1,10 +1,10 @@
 package app
 
 import (
-	"github.com/ekkinox/fx-template/app/handler/crud"
-	"github.com/ekkinox/fx-template/app/handler/http"
-	"github.com/ekkinox/fx-template/app/handler/pubsub"
-	"github.com/ekkinox/fx-template/app/middleware"
+	"github.com/ekkinox/fx-template/internal/app/handler/crud"
+	"github.com/ekkinox/fx-template/internal/app/handler/http"
+	"github.com/ekkinox/fx-template/internal/app/handler/pubsub"
+	"github.com/ekkinox/fx-template/internal/app/middleware"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
 	"go.uber.org/fx"
 )

@@ -7,9 +7,6 @@ import (
 )
 
 var FxLoggerModule = fx.Module("logger",
-	// modules dependencies
-	fxconfig.FxConfigModule,
-	// logger
 	fx.Provide(
 		NewFxLogger,
 	),

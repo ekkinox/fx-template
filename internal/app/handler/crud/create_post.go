@@ -3,9 +3,8 @@ package crud
 import (
 	"net/http"
 
-	"github.com/ekkinox/fx-template/app/model"
-	"github.com/ekkinox/fx-template/app/repository"
-
+	"github.com/ekkinox/fx-template/internal/app/model"
+	"github.com/ekkinox/fx-template/internal/app/repository"
 	"github.com/labstack/echo/v4"
 )
 

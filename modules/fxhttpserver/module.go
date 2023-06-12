@@ -9,7 +9,6 @@ import (
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
-	"github.com/ekkinox/fx-template/modules/fxtracer"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
@@ -18,10 +17,9 @@ import (
 
 const DefaultPort = 8080
 
-var FxHttpServerModule = fx.Module("http-server",
+var FxHttpServerModule = fx.Module(
+	"http-server",
 	// modules dependencies
-	fxlogger.FxLoggerModule,
-	fxtracer.FxTracerModule,
 	fxhealthchecker.FxHealthCheckerModule,
 	// http server
 	fx.Provide(
@@ -146,8 +144,8 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	// debuggers
 	if p.Config.AppDebug() {
 		g := e.Group("/_debug")
-		// config
-		g.GET("/config", func(c echo.Context) error {
+		// configs
+		g.GET("/configs", func(c echo.Context) error {
 			return c.JSON(http.StatusOK, p.Config.AllSettings())
 		})
 		// routes

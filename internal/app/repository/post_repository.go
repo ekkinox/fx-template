@@ -2,7 +2,8 @@ package repository
 
 import (
 	"context"
-	"github.com/ekkinox/fx-template/app/model"
+
+	"github.com/ekkinox/fx-template/internal/app/model"
 	"gorm.io/gorm"
 )
 
