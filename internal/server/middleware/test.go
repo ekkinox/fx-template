@@ -18,7 +18,7 @@ func NewTestMiddleware(config *fxconfig.Config) *TestMiddleware {
 func (m *TestMiddleware) Handle() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			c.Logger().Infof("test middleware for app: %s", m.config.AppName())
+			c.Logger().Infof("test middleware for server: %s", m.config.AppName())
 
 			return next(c)
 		}

@@ -1,10 +1,10 @@
 version: '3'
 
 services:
-  app:
-    container_name: app
+  server:
+    container_name: server
     build:
-      dockerfile: Dockerfile-dev
+      dockerfile: Dockerfile-server-dev
     networks:
       - network
     ports:
@@ -14,8 +14,20 @@ services:
       - .:/app
     env_file:
       - .env
-  db:
-    container_name: db
+  worker:
+    container_name: worker
+    build:
+      dockerfile: Dockerfile-worker-dev
+    networks:
+      - network
+    ports:
+      - "40001:40000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+  database:
+    container_name: database
     image: mysql:8
     restart: always
     networks:
@@ -25,7 +37,7 @@ services:
     expose:
       - "3306"
     volumes:
-      - db_data:/var/lib/mysql
+      - database_data:/var/lib/mysql
     env_file:
       - .env
   pubsub:
@@ -43,7 +55,7 @@ services:
       - .env
 
 volumes:
-  db_data:
+  database_data:
     driver: local
 
 networks:

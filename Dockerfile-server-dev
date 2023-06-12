@@ -5,4 +5,4 @@ RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 WORKDIR /app
 
-CMD ["air",  "serve"]
+CMD ["air", "-c", ".air.server.toml", "--", "server"]

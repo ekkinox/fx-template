@@ -4,9 +4,9 @@ tmp_dir = "build"
 
 [build]
   args_bin = []
-  bin = "./build/main"
+  bin = "./build/worker"
   #full_bin = "dlv --listen=:40000 --headless=true --api-version=2 --accept-multiclient exec ./build/main"
-  cmd = "go build -gcflags='all=-N -l' -o ./build/main ."
+  cmd = "go build -gcflags='all=-N -l' -o ./build/worker ."
   delay = 0
   exclude_dir = ["assets", "build", "vendor", "testdata"]
   exclude_file = []

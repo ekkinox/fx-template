@@ -145,7 +145,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	if p.Config.AppDebug() {
 		g := e.Group("/_debug")
 		// configs
-		g.GET("/configs", func(c echo.Context) error {
+		g.GET("/config", func(c echo.Context) error {
 			return c.JSON(http.StatusOK, p.Config.AllSettings())
 		})
 		// routes

@@ -17,7 +17,7 @@ const AppEnvDev = "dev"
 const AppEnvTest = "test"
 
 const DefaultAppEnv = AppEnvProd
-const DefaultAppName = "my-app"
+const DefaultAppName = "app"
 const DefaultAppVersion = "unknown"
 
 func NewConfig() (*Config, error) {

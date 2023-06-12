@@ -1,10 +1,10 @@
-package app
+package server
 
 import (
-	"github.com/ekkinox/fx-template/internal/app/handler/crud"
-	"github.com/ekkinox/fx-template/internal/app/handler/http"
-	"github.com/ekkinox/fx-template/internal/app/handler/pubsub"
-	"github.com/ekkinox/fx-template/internal/app/middleware"
+	"github.com/ekkinox/fx-template/internal/server/handler/crud"
+	"github.com/ekkinox/fx-template/internal/server/handler/http"
+	"github.com/ekkinox/fx-template/internal/server/handler/pubsub"
+	"github.com/ekkinox/fx-template/internal/server/middleware"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
 	"go.uber.org/fx"
 )
@@ -16,7 +16,6 @@ func RegisterHandlers() fx.Option {
 		fxhttpserver.AsHandler("GET", "/http/pong", http.NewPongHandler),
 		// pubsub
 		fxhttpserver.AsHandler("GET", "/pubsub/publish", pubsub.NewPublishHandler),
-		fxhttpserver.AsHandler("GET", "/pubsub/subscribe", pubsub.NewSubscribeHandler),
 		// crud
 		fxhttpserver.AsHandlersGroup(
 			"/crud/posts",

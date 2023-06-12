@@ -5,7 +5,7 @@ down:
 	docker compose down
 
 fresh:
-	docker compose down
+	docker compose down --remove-orphans
 	docker compose build --no-cache
 	docker compose up -d --build -V
 

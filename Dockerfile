@@ -5,7 +5,7 @@ ENV CGO_ENABLED=0
 WORKDIR /src
 COPY . .
 RUN go mod download
-RUN go build -o /app
+RUN go build -o /server
 
 ## Multistage deploy
 FROM gcr.io/distroless/base-debian10

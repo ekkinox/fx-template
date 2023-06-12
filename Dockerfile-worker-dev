@@ -1,0 +1,8 @@
+FROM golang:1.20-alpine
+
+RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+WORKDIR /app
+
+CMD ["air", "-c", ".air.worker.toml", "--", "worker"]
