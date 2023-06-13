@@ -11,6 +11,8 @@ services:
     ports:
       - "8080:8080"
       - "40000:40000"
+    expose:
+      - "8080"
     volumes:
       - .:/app
     env_file:

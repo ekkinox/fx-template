@@ -24,7 +24,7 @@ func (h *PingHandler) Handle() echo.HandlerFunc {
 
 		client := fxhttpserver.CtxHttpClient(c)
 
-		res, err := client.Get(h.config.GetString("configs.ping.url"))
+		res, err := client.Get(h.config.GetString("config.ping.url"))
 		if err != nil {
 			c.Logger().Errorf("cannot request target: %v", err)
 			return err

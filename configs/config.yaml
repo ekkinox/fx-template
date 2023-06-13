@@ -17,6 +17,6 @@ pubsub:
     test: test-topic-sub
 config:
     ping:
-      url: http://localhost:8080/http/pong
+      url: ${APP_URL}/http/pong
     pong:
       should_fail: false

@@ -21,7 +21,7 @@ func NewPongHandler(config *fxconfig.Config) *PongHandler {
 func (h *PongHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		if h.config.GetBool("configs.pong.should_fail") {
+		if h.config.GetBool("config.pong.should_fail") {
 			return echo.NewHTTPError(http.StatusInternalServerError, "pong configured to fail")
 		}
 
