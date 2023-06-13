@@ -12,7 +12,7 @@ cp .env.example .env
 Then, this project provides a [Makefile](Makefile), offering the following commands:
 
 ```shell
-# app
+# apps
 make up                   # start the docker compose stack
 make down                 # stop the docker compose stack
 make logs                 # stream the docker compose stack logs

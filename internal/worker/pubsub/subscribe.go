@@ -33,7 +33,8 @@ func (w *SubscribeWorker) Run() error {
 	}
 
 	err = subscription.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		w.logger.Info().Msgf("received new message: %+v", msg)
+		w.logger.Info().Msgf("received new message, data: %v", string(msg.Data))
+
 		msg.Ack()
 	})
 	if err != nil {

@@ -4,7 +4,8 @@ services:
   server:
     container_name: server
     build:
-      dockerfile: Dockerfile-server-dev
+      dockerfile: Dockerfile-dev
+    command: ["air", "-c", ".air.server.toml", "--", "server"]
     networks:
       - network
     ports:
@@ -17,7 +18,8 @@ services:
   worker:
     container_name: worker
     build:
-      dockerfile: Dockerfile-worker-dev
+      dockerfile: Dockerfile-dev
+    command: ["air", "-c", ".air.worker.toml", "--", "worker"]
     networks:
       - network
     ports:

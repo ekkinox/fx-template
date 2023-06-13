@@ -12,9 +12,9 @@ traces:
   collector: ${TRACES_COLLECTOR}
 pubsub:
   topics:
-    test:  test-topic
+    test: test-topic
   subscriptions:
-    test:  test-subscription
+    test: test-topic-sub
 config:
     ping:
       url: http://localhost:8080/http/pong
