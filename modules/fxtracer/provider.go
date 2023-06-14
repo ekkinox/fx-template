@@ -2,9 +2,10 @@ package fxtracer
 
 import (
 	"context"
+	"time"
+
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
-	"time"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"go.opentelemetry.io/otel"
@@ -75,8 +76,6 @@ func NewTracerProvider(config *fxconfig.Config, logger *fxlogger.Logger) (*trace
 
 	otel.SetTracerProvider(tracerProvider)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-
-	logger.Debug().Msg("tracer is ready")
 
 	return tracerProvider, nil
 }

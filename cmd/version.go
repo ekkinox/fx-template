@@ -5,7 +5,6 @@ import (
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/spf13/cobra"
-	"go.uber.org/fx"
 )
 
 func init() {
@@ -15,23 +14,13 @@ func init() {
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Application version",
-	Long:  "Print the application version",
+	Long:  "Print the application name and version",
 	Run: func(cmd *cobra.Command, args []string) {
-		rootFxOpts = append(
-			rootFxOpts,
-			fx.NopLogger,
-			fx.Invoke(func(config *fxconfig.Config) {
-				fmt.Printf("version: %s\n", config.AppVersion())
-			}),
-		)
-
-		app := fx.New(rootFxOpts...)
-
-		if err := app.Start(cmd.Context()); err != nil {
-			fmt.Printf("error starting application: %v", err)
+		config, err := fxconfig.NewConfig()
+		if err != nil {
+			fmt.Printf("error getting config: %v", err)
 		}
-		if err := app.Stop(cmd.Context()); err != nil {
-			fmt.Printf("error stopping application: %v", err)
-		}
+
+		fmt.Printf("application: %s, version: %s", config.AppName(), config.AppVersion())
 	},
 }

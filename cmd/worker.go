@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"github.com/ekkinox/fx-template/internal/worker/pubsub"
+	"github.com/ekkinox/fx-template/modules/fxconfig"
+	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/ekkinox/fx-template/modules/fxpubsub"
 	"github.com/ekkinox/fx-template/modules/fxtracer"
 	"github.com/spf13/cobra"
@@ -17,16 +19,18 @@ var workerCmd = &cobra.Command{
 	Short: "Worker application",
 	Long:  "Pub/Sub worker application",
 	Run: func(cmd *cobra.Command, args []string) {
-		rootFxOpts = append(
-			rootFxOpts,
+
+		worker := fx.New(
+			fxconfig.FxConfigModule,
+			fxlogger.FxLoggerModule,
 			fxtracer.FxTracerModule,
 			fxpubsub.FxPubSubModule,
 			fx.Provide(pubsub.NewSubscribeWorker),
-			fx.Invoke(func(worker *pubsub.SubscribeWorker) {
-				worker.Run()
+			fx.Invoke(func(w *pubsub.SubscribeWorker) {
+				w.Run()
 			}),
 		)
 
-		fx.New(rootFxOpts...).Run()
+		worker.Run()
 	},
 }
