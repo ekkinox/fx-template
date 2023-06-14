@@ -9,7 +9,6 @@ import (
 var DefaultHeadersToForward = []string{
 	"Authorization",
 	"X-Request-ID",
-	"aaa",
 }
 
 type options struct {

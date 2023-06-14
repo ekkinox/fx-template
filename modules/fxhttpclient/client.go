@@ -2,7 +2,6 @@ package fxhttpclient
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -10,8 +9,6 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
-
-const HttpClientContextRequestKey = "_httpClientContextRequest"
 
 type HttpClient struct {
 	context          context.Context
@@ -42,9 +39,6 @@ func NewCtxHttpClient(ctx context.Context, opts ...HttpClientOption) *HttpClient
 func (c *HttpClient) Do(req *http.Request) (*http.Response, error) {
 	req = req.WithContext(c.context)
 
-	fmt.Printf("in DO !\n**********************************\n")
-	fmt.Printf("ctx: %+v", c.context)
-
 	for name, values := range c.headersToForward {
 		for _, value := range values {
 			req.Header.Add(name, value)
@@ -55,9 +49,6 @@ func (c *HttpClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func (c *HttpClient) Get(url string) (resp *http.Response, err error) {
-
-	fmt.Printf("in GET !\n**********************************\n")
-
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -88,4 +79,13 @@ func (c *HttpClient) Post(url, contentType string, body io.Reader) (resp *http.R
 
 func (c *HttpClient) PostForm(url string, data url.Values) (resp *http.Response, err error) {
 	return c.Post(url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()))
+}
+
+func (c *HttpClient) CloseIdleConnections() {
+	type closeIdler interface {
+		CloseIdleConnections()
+	}
+	if tr, ok := c.client.Transport.(closeIdler); ok {
+		tr.CloseIdleConnections()
+	}
 }

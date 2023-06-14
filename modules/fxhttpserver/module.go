@@ -10,8 +10,6 @@ import (
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/fx"
 )
 
@@ -51,59 +49,7 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 	e.HTTPErrorHandler = NewHttpServerErrorHandler(p.Config)
 
 	// middlewares
-	e.Use(middleware.Recover())
-	e.Use(middleware.RequestID())
-	e.Use(otelecho.Middleware(p.Config.AppName()))
-	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-		LogMethod:    true,
-		LogURI:       true,
-		LogStatus:    true,
-		LogRequestID: true,
-		LogLatency:   true,
-		LogUserAgent: true,
-		LogRemoteIP:  true,
-		LogReferer:   true,
-		LogError:     true,
-		BeforeNextFunc: func(c echo.Context) {
-			requestId := c.Request().Header.Get(headerRequestID)
-			if requestId == "" {
-				requestId = c.Response().Header().Get(headerRequestID)
-			}
-
-			traceParent := c.Request().Header.Get(headerTraceParent)
-			if traceParent == "" {
-				traceParent = c.Response().Header().Get(headerTraceParent)
-			}
-
-			corrLogger := l.logger.
-				With().
-				Str(headerRequestID, requestId).
-				Str(headerTraceParent, traceParent).
-				Logger()
-
-			c.SetRequest(c.Request().WithContext(corrLogger.WithContext(c.Request().Context())))
-			c.SetLogger(NewEchoLogger(fxlogger.FromLogger(corrLogger)))
-		},
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			evt := l.logger.Info()
-			if v.Error != nil {
-				evt = l.logger.Error().Err(v.Error)
-			}
-
-			evt.
-				Str("method", v.Method).
-				Str("uri", v.URI).
-				Int("status", v.Status).
-				Str("latency", v.Latency.String()).
-				Str("x-request-id", v.RequestID).
-				Str("traceparent", c.Request().Header.Get(headerTraceParent)).
-				Str("remote-ip", v.RemoteIP).
-				Str("referer", v.Referer).
-				Msg("")
-
-			return nil
-		},
-	}))
+	e = applyDefaultMiddlewares(e, p.Config, l)
 
 	// groups
 	resolvedHandlersGroups, err := p.Router.ResolveHandlersGroups()

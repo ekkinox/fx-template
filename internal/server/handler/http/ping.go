@@ -2,6 +2,7 @@ package http
 
 import (
 	"io"
+	"net/http"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
@@ -24,7 +25,14 @@ func (h *PingHandler) Handle() echo.HandlerFunc {
 
 		client := fxhttpserver.CtxHttpClient(c)
 
-		res, err := client.Get(h.config.GetString("config.ping.url"))
+		req, err := http.NewRequest("GET", h.config.GetString("config.ping.url"), nil)
+		if err != nil {
+			c.Logger().Errorf("cannot create request: %v", err)
+		}
+
+		req.Header.Set("custom", "value")
+
+		res, err := client.Do(req)
 		if err != nil {
 			c.Logger().Errorf("cannot request target: %v", err)
 			return err

@@ -1,5 +1,5 @@
 app:
-  name: "go-skel"
+  name: ${APP_NAME}
   version: "0.0.2"
 http:
   server:
@@ -17,6 +17,6 @@ pubsub:
     test: test-topic-sub
 config:
     ping:
-      url: ${APP_URL}/http/pong
+      url: ${PONG_URL}
     pong:
       should_fail: false
