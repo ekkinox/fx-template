@@ -4,6 +4,62 @@ import (
 	"go.uber.org/fx"
 )
 
+type MiddlewareRegistration struct {
+	middleware any
+	kind       MiddlewareKind
+}
+
+func (m *MiddlewareRegistration) Middleware() any {
+	return m.middleware
+}
+
+func (m *MiddlewareRegistration) Kind() MiddlewareKind {
+	return m.kind
+}
+
+func NewMiddlewareRegistration(middleware any, kind MiddlewareKind) *MiddlewareRegistration {
+	return &MiddlewareRegistration{
+		middleware: middleware,
+		kind:       kind,
+	}
+}
+
+func AsMiddleware(middleware any, kind MiddlewareKind) fx.Option {
+	return RegisterMiddleware(NewMiddlewareRegistration(middleware, kind))
+}
+
+func RegisterMiddleware(middlewareRegistration *MiddlewareRegistration) fx.Option {
+
+	var providers []any
+
+	var middlewareDef MiddlewareDefinition
+	if !isConcreteMiddleware(middlewareRegistration.Middleware()) {
+		providers = append(
+			providers,
+			fx.Annotate(
+				middlewareRegistration.Middleware(),
+				fx.As(new(Middleware)),
+				fx.ResultTags(`group:"http-server-middlewares"`),
+			),
+		)
+
+		middlewareDef = newMiddlewareDefinition(getReturnType(middlewareRegistration.Middleware()), middlewareRegistration.kind)
+	} else {
+		middlewareDef = newMiddlewareDefinition(middlewareRegistration.Middleware(), middlewareRegistration.kind)
+	}
+
+	return fx.Options(
+		fx.Provide(providers...),
+		fx.Supply(
+			fx.Annotate(
+				middlewareDef,
+				fx.As(new(MiddlewareDefinition)),
+				fx.ResultTags(`group:"http-server-middleware-definitions"`),
+			),
+		),
+	)
+}
+
 type HandlerRegistration struct {
 	method      string
 	path        string
@@ -56,9 +112,9 @@ func RegisterHandler(handlerRegistration *HandlerRegistration) fx.Option {
 				),
 			)
 
-			middlewareDefs = append(middlewareDefs, newMiddlewareDefinition(getReturnType(middleware)))
+			middlewareDefs = append(middlewareDefs, newMiddlewareDefinition(getReturnType(middleware), Attached))
 		} else {
-			middlewareDefs = append(middlewareDefs, newMiddlewareDefinition(middleware))
+			middlewareDefs = append(middlewareDefs, newMiddlewareDefinition(middleware, Attached))
 		}
 	}
 
@@ -144,9 +200,9 @@ func RegisterHandlersGroup(handlersGroupRegistration *HandlersGroupRegistration)
 				),
 			)
 
-			groupMiddlewareDefs = append(groupMiddlewareDefs, newMiddlewareDefinition(getReturnType(middleware)))
+			groupMiddlewareDefs = append(groupMiddlewareDefs, newMiddlewareDefinition(getReturnType(middleware), Attached))
 		} else {
-			groupMiddlewareDefs = append(groupMiddlewareDefs, newMiddlewareDefinition(middleware))
+			groupMiddlewareDefs = append(groupMiddlewareDefs, newMiddlewareDefinition(middleware, Attached))
 		}
 	}
 
@@ -167,9 +223,9 @@ func RegisterHandlersGroup(handlersGroupRegistration *HandlersGroupRegistration)
 					),
 				)
 
-				middlewareDefs = append(middlewareDefs, newMiddlewareDefinition(getReturnType(middleware)))
+				middlewareDefs = append(middlewareDefs, newMiddlewareDefinition(getReturnType(middleware), Attached))
 			} else {
-				middlewareDefs = append(middlewareDefs, newMiddlewareDefinition(middleware))
+				middlewareDefs = append(middlewareDefs, newMiddlewareDefinition(middleware, Attached))
 			}
 		}
 

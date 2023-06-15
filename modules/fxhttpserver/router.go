@@ -3,6 +3,7 @@ package fxhttpserver
 import (
 	"errors"
 	"fmt"
+
 	"github.com/labstack/echo/v4"
 	"go.uber.org/fx"
 )
@@ -40,6 +41,38 @@ func NewFxRouter(p FxRouterParam) *Router {
 		handlerDefinitions:       p.HandlerDefinitions,
 		handlersGroupDefinitions: p.HandlersGroupDefinitions,
 	}
+}
+
+func (r *Router) ResolveMiddlewares() ([]ResolvedMiddleware, error) {
+	var resolvedMiddlewares []ResolvedMiddleware
+
+	for _, middlewareDef := range r.middlewareDefinitions {
+
+		var resolvedMiddleware ResolvedMiddleware
+
+		if middlewareDef.Kind() != Attached {
+			if middlewareDef.Concrete() {
+				resolvedMiddleware = newResolvedMiddleware(
+					middlewareDef.Middleware().(func(echo.HandlerFunc) echo.HandlerFunc),
+					middlewareDef.Kind(),
+				)
+			} else {
+				registeredMiddleware, err := r.lookupRegisteredMiddleware(middlewareDef.Middleware().(string))
+				if err != nil {
+					return nil, err
+				}
+
+				resolvedMiddleware = newResolvedMiddleware(
+					registeredMiddleware.Handle(),
+					middlewareDef.Kind(),
+				)
+			}
+		}
+
+		resolvedMiddlewares = append(resolvedMiddlewares, resolvedMiddleware)
+	}
+
+	return resolvedMiddlewares, nil
 }
 
 func (r *Router) ResolveHandlers() ([]ResolvedHandler, error) {

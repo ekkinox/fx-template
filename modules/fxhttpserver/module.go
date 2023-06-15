@@ -71,6 +71,22 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 		l.Debugf("registered handlers group for prefix %s", g.Prefix())
 	}
 
+	// middlewares
+	resolvedMiddlewares, err := p.Router.ResolveMiddlewares()
+	if err != nil {
+		l.Error("cannot resolve router middlewares: %v", err)
+	}
+
+	for _, m := range resolvedMiddlewares {
+		if m.Kind() == GlobalPre {
+			e.Pre(m.Middleware())
+		}
+		if m.Kind() == GlobalUse {
+			e.Use(m.Middleware())
+		}
+		l.Debugf("registered %s middleware %T", m.Kind().String(), m.Middleware())
+	}
+
 	// handlers
 	resolvedHandlers, err := p.Router.ResolveHandlers()
 	if err != nil {

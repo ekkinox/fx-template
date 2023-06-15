@@ -26,6 +26,7 @@ func NewCtxHttpClient(ctx context.Context, opts ...HttpClientOption) *HttpClient
 	client := &http.Client{
 		Transport:     otelhttp.NewTransport(appliedOpts.Transport),
 		CheckRedirect: appliedOpts.CheckRedirect,
+		Jar:           appliedOpts.Jar,
 		Timeout:       appliedOpts.Timeout,
 	}
 

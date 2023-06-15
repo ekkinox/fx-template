@@ -5,20 +5,20 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type TestMiddleware struct {
+type GlobalMiddleware struct {
 	config *fxconfig.Config
 }
 
-func NewTestMiddleware(config *fxconfig.Config) *TestMiddleware {
-	return &TestMiddleware{
+func NewGlobalMiddleware(config *fxconfig.Config) *GlobalMiddleware {
+	return &GlobalMiddleware{
 		config: config,
 	}
 }
 
-func (m *TestMiddleware) Handle() echo.MiddlewareFunc {
+func (m *GlobalMiddleware) Handle() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			c.Logger().Infof("test middleware for server: %s", m.config.AppName())
+			c.Logger().Infof("GLOBAL middleware for app: %s", m.config.AppName())
 
 			return next(c)
 		}

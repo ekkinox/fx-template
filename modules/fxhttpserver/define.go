@@ -3,15 +3,18 @@ package fxhttpserver
 type MiddlewareDefinition interface {
 	Concrete() bool
 	Middleware() any
+	Kind() MiddlewareKind
 }
 
 type middlewareDefinition struct {
 	middleware any
+	kind       MiddlewareKind
 }
 
-func newMiddlewareDefinition(middleware any) *middlewareDefinition {
+func newMiddlewareDefinition(middleware any, kind MiddlewareKind) *middlewareDefinition {
 	return &middlewareDefinition{
 		middleware: middleware,
+		kind:       kind,
 	}
 }
 
@@ -21,6 +24,10 @@ func (d *middlewareDefinition) Concrete() bool {
 
 func (d *middlewareDefinition) Middleware() any {
 	return d.middleware
+}
+
+func (d *middlewareDefinition) Kind() MiddlewareKind {
+	return d.kind
 }
 
 type HandlerDefinition interface {

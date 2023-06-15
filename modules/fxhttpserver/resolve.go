@@ -2,6 +2,31 @@ package fxhttpserver
 
 import "github.com/labstack/echo/v4"
 
+type ResolvedMiddleware interface {
+	Middleware() echo.MiddlewareFunc
+	Kind() MiddlewareKind
+}
+
+type resolveMiddleware struct {
+	middleware echo.MiddlewareFunc
+	kind       MiddlewareKind
+}
+
+func newResolvedMiddleware(middleware echo.MiddlewareFunc, kind MiddlewareKind) *resolveMiddleware {
+	return &resolveMiddleware{
+		middleware: middleware,
+		kind:       kind,
+	}
+}
+
+func (r *resolveMiddleware) Middleware() echo.MiddlewareFunc {
+	return r.middleware
+}
+
+func (r *resolveMiddleware) Kind() MiddlewareKind {
+	return r.kind
+}
+
 type ResolvedHandler interface {
 	Method() string
 	Path() string

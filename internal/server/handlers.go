@@ -11,8 +11,10 @@ import (
 
 func RegisterHandlers() fx.Option {
 	return fx.Options(
+		// global
+		fxhttpserver.AsMiddleware(middleware.NewGlobalMiddleware, fxhttpserver.GlobalPre),
 		// http
-		fxhttpserver.AsHandler("GET", "/http/ping", http.NewPingHandler),
+		fxhttpserver.AsHandler("GET", "/http/ping", http.NewPingHandler, middleware.NewHandlerMiddleware),
 		fxhttpserver.AsHandler("GET", "/http/pong", http.NewPongHandler),
 		// pubsub
 		fxhttpserver.AsHandler("GET", "/pubsub/publish", pubsub.NewPublishHandler),
@@ -20,13 +22,13 @@ func RegisterHandlers() fx.Option {
 		fxhttpserver.AsHandlersGroup(
 			"/crud/posts",
 			[]*fxhttpserver.HandlerRegistration{
-				fxhttpserver.NewHandlerRegistration("GET", "", crud.NewListPostsHandler),
+				fxhttpserver.NewHandlerRegistration("GET", "", crud.NewListPostsHandler, middleware.NewHandlerMiddleware),
 				fxhttpserver.NewHandlerRegistration("POST", "", crud.NewCreatePostHandler),
 				fxhttpserver.NewHandlerRegistration("GET", "/:id", crud.NewGetPostHandler),
 				fxhttpserver.NewHandlerRegistration("PATCH", "/:id", crud.NewUpdatePostHandler),
 				fxhttpserver.NewHandlerRegistration("DELETE", "/:id", crud.NewDeletePostHandler),
 			},
-			middleware.NewTestMiddleware,
+			middleware.NewGroupMiddleware,
 		),
 	)
 }

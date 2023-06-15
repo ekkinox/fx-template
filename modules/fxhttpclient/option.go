@@ -14,6 +14,7 @@ var DefaultHeadersToForward = []string{
 type options struct {
 	Transport        http.RoundTripper
 	CheckRedirect    func(req *http.Request, via []*http.Request) error
+	Jar              http.CookieJar
 	Timeout          time.Duration
 	HeadersToForward map[string][]string
 }
@@ -22,6 +23,7 @@ var defaultHttpClientOptions = options{
 	Transport:        http.DefaultTransport,
 	CheckRedirect:    nil,
 	Timeout:          time.Second * 10,
+	Jar:              nil,
 	HeadersToForward: map[string][]string{},
 }
 
@@ -36,6 +38,12 @@ func WithTransport(t http.RoundTripper) HttpClientOption {
 func WithCheckRedirect(f func(req *http.Request, via []*http.Request) error) HttpClientOption {
 	return func(o *options) {
 		o.CheckRedirect = f
+	}
+}
+
+func WithCookieJar(j http.CookieJar) HttpClientOption {
+	return func(o *options) {
+		o.Jar = j
 	}
 }
 
