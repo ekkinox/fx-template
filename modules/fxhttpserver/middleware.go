@@ -1,6 +1,7 @@
 package fxhttpserver
 
 import (
+	"github.com/ekkinox/fx-template/modules/fxauthentication"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/labstack/echo/v4"
@@ -82,6 +83,9 @@ func applyDefaultMiddlewares(e *echo.Echo, c *fxconfig.Config, l *EchoLogger) *e
 			return nil
 		},
 	}))
+
+	// authentication context
+	e.Use(fxauthentication.Middleware())
 
 	return e
 }

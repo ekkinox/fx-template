@@ -41,7 +41,7 @@ var healthCheckCmd = &cobra.Command{
 				result := c.Run(cmd.Context())
 
 				for n, r := range result.ProbesResults {
-					fmt.Printf("[%s] sucess: %v, mesage: %s\n", n, r.Success, r.Message)
+					fmt.Printf("[%s] success: %v, message: %sn", n, r.Success, r.Message)
 				}
 			}),
 			fx.NopLogger,

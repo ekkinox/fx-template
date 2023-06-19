@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/ekkinox/fx-template/internal/server/handler/auth"
 	"github.com/ekkinox/fx-template/internal/server/handler/crud"
 	"github.com/ekkinox/fx-template/internal/server/handler/http"
 	"github.com/ekkinox/fx-template/internal/server/handler/pubsub"
@@ -12,7 +13,9 @@ import (
 func RegisterHandlers() fx.Option {
 	return fx.Options(
 		// global
-		fxhttpserver.AsMiddleware(middleware.NewGlobalMiddleware, fxhttpserver.GlobalPre),
+		fxhttpserver.AsMiddleware(middleware.NewGlobalMiddleware, fxhttpserver.GlobalUse),
+		// auth
+		fxhttpserver.AsHandler("GET", "/auth/context", auth.NewAuthContextHandler),
 		// http
 		fxhttpserver.AsHandler("GET", "/http/ping", http.NewPingHandler, middleware.NewHandlerMiddleware),
 		fxhttpserver.AsHandler("GET", "/http/pong", http.NewPongHandler),

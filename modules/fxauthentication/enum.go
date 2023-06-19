@@ -1,73 +1,102 @@
 package fxauthentication
 
-type EntityKind int
-
-const (
-	UnknownEntityKind EntityKind = iota
-	GuestEntityKind
-	UserEntityKind
-	AdminEntityKind
-	MachineEntityKind
+import (
+	"encoding/json"
+	"fmt"
 )
 
-func (e EntityKind) String() string {
-	switch e {
-	case GuestEntityKind:
-		return "guest"
-	case UserEntityKind:
-		return "user"
-	case AdminEntityKind:
-		return "admin"
-	case MachineEntityKind:
-		return "machine"
-	default:
-		return "unknown"
+type EntityType int
+
+const (
+	UnknownEntity EntityType = iota
+	GuestEntity
+	UserEntity
+	AdminEntity
+	MachineEntity
+)
+
+func (e *EntityType) UnmarshalJSON(data []byte) error {
+	var str string
+
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
 	}
+
+	switch str {
+	case "guest":
+		*e = GuestEntity
+	case "user":
+		*e = UserEntity
+	case "admin":
+		*e = AdminEntity
+	case "machine":
+		*e = MachineEntity
+	default:
+		return fmt.Errorf("invalid entity type: %s", str)
+	}
+
+	return nil
 }
 
-type AccountKind int
+type AccountType int
 
 const (
-	UnknownAccountKind AccountKind = iota
-	BrandAccountKind
-	RetailerAccountKind
+	UnknownAccount AccountType = iota
+	BrandAccount
+	RetailerAccount
 )
 
-func (a AccountKind) String() string {
-	switch a {
-	case BrandAccountKind:
-		return "brand"
-	case RetailerAccountKind:
-		return "retailer"
-	default:
-		return "unknown"
+func (a *AccountType) UnmarshalJSON(data []byte) error {
+	var str string
+
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
 	}
+
+	switch str {
+	case "brand":
+		*a = BrandAccount
+	case "retailer":
+		*a = RetailerAccount
+	default:
+		return fmt.Errorf("invalid account type: %s", str)
+	}
+
+	return nil
 }
 
-type IdentityProviderKind int
+type IdentityProviderType int
 
 const (
-	UnknownIdentityProviderKind IdentityProviderKind = iota
-	GuestIdentityProviderKind
-	UserIdentityProviderKind
-	AdminIdentityProviderKind
-	MachineIdentityProviderKind
-	ImpersonationIdentityProviderKind
+	UnknownIdentityProvider IdentityProviderType = iota
+	GuestIdentityProvider
+	UserIdentityProvider
+	AdminIdentityProvider
+	MachineIdentityProvider
+	ImpersonationIdentityProvider
 )
 
-func (i IdentityProviderKind) String() string {
-	switch i {
-	case GuestIdentityProviderKind:
-		return "aks_guest"
-	case UserIdentityProviderKind:
-		return "aks_user"
-	case AdminIdentityProviderKind:
-		return "aks_admin"
-	case MachineIdentityProviderKind:
-		return "aks_machine"
-	case ImpersonationIdentityProviderKind:
-		return "aks_imp"
-	default:
-		return "unknown"
+func (i *IdentityProviderType) UnmarshalJSON(data []byte) error {
+	var str string
+
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
 	}
+
+	switch str {
+	case "aks_guest":
+		*i = GuestIdentityProvider
+	case "aks_user":
+		*i = UserIdentityProvider
+	case "aks_admin":
+		*i = AdminIdentityProvider
+	case "aks_machine":
+		*i = MachineIdentityProvider
+	case "aks_imp":
+		*i = ImpersonationIdentityProvider
+	default:
+		return fmt.Errorf("invalid identity provider type: %s", str)
+	}
+
+	return nil
 }
