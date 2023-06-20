@@ -1,6 +1,7 @@
 package fxhttpserver
 
 import (
+	"github.com/ekkinox/fx-template/modules/fxauthentication"
 	"github.com/ekkinox/fx-template/modules/fxhttpclient"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/ekkinox/fx-template/modules/fxtracer"
@@ -23,4 +24,8 @@ func CtxHttpClient(ctx echo.Context, opts ...fxhttpclient.HttpClientOption) *fxh
 	)
 
 	return fxhttpclient.NewCtxHttpClient(ctx.Request().Context(), opts...)
+}
+
+func CtxAuthContext(ctx echo.Context) *fxauthentication.AuthenticationContext {
+	return ctx.Get(fxauthentication.AuthenticationContextKey).(*fxauthentication.AuthenticationContext)
 }

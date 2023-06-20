@@ -7,7 +7,7 @@ type Account struct {
 
 type AuthenticationContext struct {
 	Uuid                 string               `json:"sub"`
-	ClientId             string               `json:"cid"`
+	ClientId             string               `json:"cid,omitempty"`
 	IdentityProviderType IdentityProviderType `json:"idp"`
 	Aks                  struct {
 		EntityType           EntityType             `json:"entity"`

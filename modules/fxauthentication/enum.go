@@ -15,6 +15,21 @@ const (
 	MachineEntity
 )
 
+func (e EntityType) String() string {
+	switch e {
+	case GuestEntity:
+		return "guest"
+	case UserEntity:
+		return "user"
+	case AdminEntity:
+		return "admin"
+	case MachineEntity:
+		return "machine"
+	default:
+		return "unknown"
+	}
+}
+
 func (e *EntityType) UnmarshalJSON(data []byte) error {
 	var str string
 
@@ -46,6 +61,17 @@ const (
 	RetailerAccount
 )
 
+func (a AccountType) String() string {
+	switch a {
+	case BrandAccount:
+		return "brand"
+	case RetailerAccount:
+		return "retailer"
+	default:
+		return "unknown"
+	}
+}
+
 func (a *AccountType) UnmarshalJSON(data []byte) error {
 	var str string
 
@@ -75,6 +101,23 @@ const (
 	MachineIdentityProvider
 	ImpersonationIdentityProvider
 )
+
+func (i IdentityProviderType) String() string {
+	switch i {
+	case GuestIdentityProvider:
+		return "aks_guest"
+	case UserIdentityProvider:
+		return "aks_user"
+	case AdminIdentityProvider:
+		return "aks_admin"
+	case MachineIdentityProvider:
+		return "aks_machine"
+	case ImpersonationIdentityProvider:
+		return "aks_imp"
+	default:
+		return "unknown"
+	}
+}
 
 func (i *IdentityProviderType) UnmarshalJSON(data []byte) error {
 	var str string
