@@ -1,4 +1,4 @@
-package fxauthentication
+package fxauthenticationcontext
 
 type Account struct {
 	Uuid        string      `json:"id"`

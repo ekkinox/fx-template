@@ -1,4 +1,4 @@
-package fxauthentication
+package fxauthenticationcontext
 
 import (
 	"encoding/base64"
@@ -18,7 +18,7 @@ func Middleware() echo.MiddlewareFunc {
 
 			authHeaderParts := strings.SplitN(authHeader, " ", 2)
 			if len(authHeaderParts) != 2 || authHeaderParts[0] != "Bearer" {
-				c.Logger().Errorf("invalid authorization header %s", authHeader)
+				c.Logger().Infof("authorization header is not a Bearer: %s, skipping", authHeader)
 
 				return next(c)
 			}

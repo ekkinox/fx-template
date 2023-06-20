@@ -29,6 +29,7 @@ var workerCmd = &cobra.Command{
 			fx.Invoke(func(w *pubsub.SubscribeWorker) {
 				w.Run()
 			}),
+			fx.WithLogger(fxlogger.FxEventLogger),
 		)
 
 		worker.Run()

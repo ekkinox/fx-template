@@ -3,7 +3,7 @@ package fxhttpserver
 import (
 	"errors"
 
-	"github.com/ekkinox/fx-template/modules/fxauthentication"
+	"github.com/ekkinox/fx-template/modules/fxauthenticationcontext"
 	"github.com/ekkinox/fx-template/modules/fxhttpclient"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/ekkinox/fx-template/modules/fxtracer"
@@ -28,9 +28,9 @@ func CtxHttpClient(c echo.Context, opts ...fxhttpclient.HttpClientOption) *fxhtt
 	return fxhttpclient.NewCtxHttpClient(c.Request().Context(), opts...)
 }
 
-func CtxAuthenticationContext(c echo.Context) (*fxauthentication.AuthenticationContext, error) {
+func CtxAuthenticationContext(c echo.Context) (*fxauthenticationcontext.AuthenticationContext, error) {
 
-	if authContext, ok := c.Get(fxauthentication.AuthenticationContextKey).(*fxauthentication.AuthenticationContext); ok {
+	if authContext, ok := c.Get(fxauthenticationcontext.AuthenticationContextKey).(*fxauthenticationcontext.AuthenticationContext); ok {
 		return authContext, nil
 	}
 

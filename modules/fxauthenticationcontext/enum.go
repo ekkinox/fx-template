@@ -1,4 +1,4 @@
-package fxauthentication
+package fxauthenticationcontext
 
 import (
 	"encoding/json"
