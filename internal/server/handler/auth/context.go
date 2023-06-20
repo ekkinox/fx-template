@@ -21,7 +21,10 @@ func NewAuthContextHandler(config *fxconfig.Config) *AuthContextHandler {
 func (h *AuthContextHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		authCtx := fxhttpserver.CtxAuthContext(c)
+		authCtx, err := fxhttpserver.CtxAuthenticationContext(c)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, "invalid auth context")
+		}
 
 		return c.JSON(http.StatusOK, echo.Map{
 			"full_context": authCtx,

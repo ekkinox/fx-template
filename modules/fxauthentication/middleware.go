@@ -3,7 +3,6 @@ package fxauthentication
 import (
 	"encoding/base64"
 	"encoding/json"
-	"net/http"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -21,7 +20,7 @@ func Middleware() echo.MiddlewareFunc {
 			if len(authHeaderParts) != 2 || authHeaderParts[0] != "Bearer" {
 				c.Logger().Errorf("invalid authorization header %s", authHeader)
 
-				return echo.NewHTTPError(http.StatusUnauthorized)
+				return next(c)
 			}
 
 			authTokenParts := strings.Split(authHeaderParts[1], ".")
@@ -34,14 +33,14 @@ func Middleware() echo.MiddlewareFunc {
 			} else {
 				c.Logger().Errorf("authorization header does not contain valid jwt: %s", authHeaderParts[1])
 
-				return echo.NewHTTPError(http.StatusUnauthorized)
+				return next(c)
 			}
 
 			base64DecodedAuthContext, err := base64.RawStdEncoding.DecodeString(encodedAuthContext)
 			if err != nil {
 				c.Logger().Errorf("cannot base64 decode authorization jwt payload %s: %v", encodedAuthContext, err)
 
-				return echo.NewHTTPError(http.StatusUnauthorized)
+				return next(c)
 			}
 
 			var authContext AuthenticationContext
@@ -49,7 +48,7 @@ func Middleware() echo.MiddlewareFunc {
 			if err != nil {
 				c.Logger().Errorf("cannot json unmarshall authorization jwt payload %s: %v", base64DecodedAuthContext, err)
 
-				return echo.NewHTTPError(http.StatusUnauthorized)
+				return next(c)
 			}
 
 			c.Set(AuthenticationContextKey, &authContext)
