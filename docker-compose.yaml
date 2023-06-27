@@ -4,15 +4,18 @@ services:
   server:
     container_name: server
     build:
+      context: .
       dockerfile: Dockerfile-dev
     command: ["air", "-c", ".air.server.toml", "--", "server"]
     networks:
       - network
     ports:
       - "8080:8080"
+      - "50051:50051"
       - "40000:40000"
     expose:
       - "8080"
+      - "50051"
     volumes:
       - .:/app
     env_file:
@@ -20,6 +23,7 @@ services:
   worker:
     container_name: worker
     build:
+      context: .
       dockerfile: Dockerfile-dev
     command: ["air", "-c", ".air.worker.toml", "--", "worker"]
     networks:

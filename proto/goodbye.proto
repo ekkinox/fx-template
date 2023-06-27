@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "github.com/ekkinox/fx-template/proto";
+
+package goodbye;
+
+service GoodbyeService {
+  rpc SayGoodbye (GoodbyeRequest) returns (GoodbyeResponse) {}
+}
+
+message GoodbyeRequest {
+  string name = 1;
+}
+
+message GoodbyeResponse {
+  string message = 1;
+}

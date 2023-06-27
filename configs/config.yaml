@@ -4,6 +4,10 @@ app:
 http:
   server:
     port: 8080
+grpc:
+  server:
+    port: 50051
+    reflection: true
 database:
   driver: mysql
   dsn: ${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_HOST}:${MYSQL_PORT})/${MYSQL_DATABASE}?parseTime=true

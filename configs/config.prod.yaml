@@ -1,2 +1,5 @@
+grpc:
+  server:
+    reflection: false
 config:
   foo: bar-prod
