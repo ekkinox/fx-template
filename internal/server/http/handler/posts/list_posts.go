@@ -1,4 +1,4 @@
-package crud
+package posts
 
 import (
 	"net/http"

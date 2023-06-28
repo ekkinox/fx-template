@@ -2,10 +2,10 @@ package http
 
 import (
 	"github.com/ekkinox/fx-template/internal/server/http/handler/auth"
-	crud2 "github.com/ekkinox/fx-template/internal/server/http/handler/crud"
-	http2 "github.com/ekkinox/fx-template/internal/server/http/handler/http"
+	"github.com/ekkinox/fx-template/internal/server/http/handler/http"
+	"github.com/ekkinox/fx-template/internal/server/http/handler/posts"
 	"github.com/ekkinox/fx-template/internal/server/http/handler/pubsub"
-	middleware2 "github.com/ekkinox/fx-template/internal/server/http/middleware"
+	"github.com/ekkinox/fx-template/internal/server/http/middleware"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
 	"go.uber.org/fx"
 )
@@ -13,25 +13,25 @@ import (
 func RegisterHandlers() fx.Option {
 	return fx.Options(
 		// global
-		fxhttpserver.AsMiddleware(middleware2.NewGlobalMiddleware, fxhttpserver.GlobalUse),
+		fxhttpserver.AsMiddleware(middleware.NewGlobalMiddleware, fxhttpserver.GlobalUse),
 		// auth
 		fxhttpserver.AsHandler("GET", "/auth/context", auth.NewAuthContextHandler),
 		// http
-		fxhttpserver.AsHandler("GET", "/http/ping", http2.NewPingHandler, middleware2.NewHandlerMiddleware),
-		fxhttpserver.AsHandler("GET", "/http/pong", http2.NewPongHandler),
+		fxhttpserver.AsHandler("GET", "/http/ping", http.NewPingHandler, middleware.NewHandlerMiddleware),
+		fxhttpserver.AsHandler("GET", "/http/pong", http.NewPongHandler),
 		// pubsub
 		fxhttpserver.AsHandler("GET", "/pubsub/publish", pubsub.NewPublishHandler),
 		// crud
 		fxhttpserver.AsHandlersGroup(
-			"/crud/posts",
+			"/posts",
 			[]*fxhttpserver.HandlerRegistration{
-				fxhttpserver.NewHandlerRegistration("GET", "", crud2.NewListPostsHandler, middleware2.NewHandlerMiddleware),
-				fxhttpserver.NewHandlerRegistration("POST", "", crud2.NewCreatePostHandler),
-				fxhttpserver.NewHandlerRegistration("GET", "/:id", crud2.NewGetPostHandler),
-				fxhttpserver.NewHandlerRegistration("PATCH", "/:id", crud2.NewUpdatePostHandler),
-				fxhttpserver.NewHandlerRegistration("DELETE", "/:id", crud2.NewDeletePostHandler),
+				fxhttpserver.NewHandlerRegistration("GET", "", posts.NewListPostsHandler, middleware.NewHandlerMiddleware),
+				fxhttpserver.NewHandlerRegistration("POST", "", posts.NewCreatePostHandler),
+				fxhttpserver.NewHandlerRegistration("GET", "/:id", posts.NewGetPostHandler),
+				fxhttpserver.NewHandlerRegistration("PATCH", "/:id", posts.NewUpdatePostHandler),
+				fxhttpserver.NewHandlerRegistration("DELETE", "/:id", posts.NewDeletePostHandler),
 			},
-			middleware2.NewGroupMiddleware,
+			middleware.NewGroupMiddleware,
 		),
 	)
 }

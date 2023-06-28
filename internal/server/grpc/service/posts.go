@@ -46,8 +46,9 @@ func (s *PostsCrudServer) CreatePost(ctx context.Context, in *posts.CreatePostRe
 	s.logger.Info().Msg("got grpc CreatePost request")
 
 	dbPostCreate := new(model.Post)
-	dbPostCreate.Title = in.Post.Title.Value
-	dbPostCreate.Description = in.Post.Description.Value
+	dbPostCreate.Title = in.Post.Title.GetValue()
+	dbPostCreate.Description = in.Post.Description.GetValue()
+	dbPostCreate.Likes = int(in.Post.Likes.GetValue())
 
 	err := s.repository.Create(ctx, dbPostCreate)
 	if err != nil {
@@ -70,8 +71,15 @@ func (s *PostsCrudServer) UpdatePost(ctx context.Context, in *posts.UpdatePostRe
 	}
 
 	dbPostUpdate := new(model.Post)
-	dbPostUpdate.Title = in.Post.Title.Value
-	dbPostUpdate.Description = in.Post.Description.Value
+	if in.Post.Title.GetValue() != "" {
+		dbPostUpdate.Title = in.Post.Title.GetValue()
+	}
+	if in.Post.Description.GetValue() != "" {
+		dbPostUpdate.Description = in.Post.Description.GetValue()
+	}
+	if in.Post.Likes.GetValue() != 0 {
+		dbPostUpdate.Likes = int(in.Post.Likes.GetValue())
+	}
 
 	err = s.repository.Update(ctx, dbPost, dbPostUpdate)
 	if err != nil {
@@ -131,5 +139,6 @@ func modelToProto(post *model.Post) *posts.Post {
 		Id:          wrapperspb.Int32(int32(post.ID)),
 		Title:       wrapperspb.String(post.Title),
 		Description: wrapperspb.String(post.Description),
+		Likes:       wrapperspb.Int32(int32(post.Likes)),
 	}
 }

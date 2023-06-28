@@ -1,4 +1,4 @@
-package crud
+package posts
 
 import (
 	"errors"
@@ -6,26 +6,26 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/ekkinox/fx-template/internal/model"
 	"github.com/ekkinox/fx-template/internal/repository"
-	"gorm.io/gorm"
-
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
-type DeletePostHandler struct {
+type UpdatePostHandler struct {
 	repository *repository.PostRepository
 }
 
-func NewDeletePostHandler(repository *repository.PostRepository) *DeletePostHandler {
-	return &DeletePostHandler{
+func NewUpdatePostHandler(repository *repository.PostRepository) *UpdatePostHandler {
+	return &UpdatePostHandler{
 		repository: repository,
 	}
 }
 
-func (h *DeletePostHandler) Handle() echo.HandlerFunc {
+func (h *UpdatePostHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		c.Logger().Info("in delete post handler")
+		c.Logger().Info("in update post handler")
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
@@ -48,12 +48,18 @@ func (h *DeletePostHandler) Handle() echo.HandlerFunc {
 			return err
 		}
 
-		err = h.repository.Delete(c.Request().Context(), post)
-		if err != nil {
-			c.Logger().Errorf("cannot delete post: %v", err)
+		update := new(model.Post)
+		if err = c.Bind(update); err != nil {
+			c.Logger().Errorf("cannot bind post updates: %v", err)
 			return err
 		}
 
-		return c.NoContent(http.StatusNoContent)
+		err = h.repository.Update(c.Request().Context(), post, update)
+		if err != nil {
+			c.Logger().Errorf("cannot update post: %v", err)
+			return err
+		}
+
+		return c.JSON(http.StatusOK, post)
 	}
 }
