@@ -1,7 +1,7 @@
-package server
+package http
 
 import (
-	"github.com/ekkinox/fx-template/internal/server/repository"
+	"github.com/ekkinox/fx-template/internal/repository"
 	"github.com/ekkinox/fx-template/modules/fxgorm"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"github.com/ekkinox/fx-template/modules/fxpubsub"

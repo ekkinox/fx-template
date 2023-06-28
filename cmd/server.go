@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/ekkinox/fx-template/internal/grpc"
-	"github.com/ekkinox/fx-template/internal/server"
+	"github.com/ekkinox/fx-template/internal/server/grpc"
+	"github.com/ekkinox/fx-template/internal/server/http"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxgrpcserver"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
@@ -29,10 +29,10 @@ var serverCmd = &cobra.Command{
 			fxtracer.FxTracerModule,
 			// http
 			fxhttpserver.FxHttpServerModule,
-			server.RegisterModules(),
-			server.RegisterHandlers(),
-			server.RegisterServices(),
-			server.RegisterOverrides(),
+			http.RegisterModules(),
+			http.RegisterHandlers(),
+			http.RegisterServices(),
+			http.RegisterOverrides(),
 			// grpc
 			fxgrpcserver.FxGrpcServerModule,
 			grpc.RegisterGrpcServices(),

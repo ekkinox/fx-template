@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+option go_package = "github.com/ekkinox/fx-template/proto/posts";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+package posts;
+
+message Post {
+  google.protobuf.Int32Value id = 1;
+  google.protobuf.StringValue title = 2;
+  google.protobuf.StringValue description = 3;
+}
+
+message PostsList {
+  repeated Post posts = 1;
+}
+
+message GetPostRequest {
+  google.protobuf.Int32Value id = 1;
+}
+
+message GetPostResponse {
+  bool success = 1;
+  Post post = 2;
+}
+
+message CreatePostRequest {
+  Post post = 1;
+}
+
+message CreatePostResponse {
+  bool success = 1;
+  Post post = 2;
+}
+
+message UpdatePostRequest {
+  Post post = 1;
+}
+
+message UpdatePostResponse {
+  bool success = 1;
+  Post post = 2;
+}
+
+message DeletePostRequest {
+  google.protobuf.Int32Value id = 1;
+}
+
+message DeletePostResponse {
+  bool success = 1;
+}
+
+message ListPostsResponse {
+  bool success = 1;
+  PostsList posts = 2;
+}
+
+service PostCrudService {
+  rpc GetPost (GetPostRequest) returns (GetPostResponse);
+  rpc CreatePost (CreatePostRequest) returns (CreatePostResponse);
+  rpc UpdatePost (UpdatePostRequest) returns (UpdatePostResponse);
+  rpc DeletePost (DeletePostRequest) returns (DeletePostResponse);
+  rpc ListPosts (google.protobuf.Empty) returns (ListPostsResponse);
+}

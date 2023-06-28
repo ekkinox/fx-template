@@ -8,6 +8,7 @@ import (
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -39,12 +40,9 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 		port = DefaultPort
 	}
 
-	p.Logger.Info().Msgf("************ services definitions: %+#v", p.GrpcServicesDefinitions)
-	p.Logger.Info().Msgf("************ services: %+v", p.GrpcServices)
-
 	grpcServer := grpc.NewServer(
-	//grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
-	//grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
 	)
 
 	if p.Config.GetBool("grpc.server.reflection") {

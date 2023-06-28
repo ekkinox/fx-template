@@ -6,26 +6,25 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ekkinox/fx-template/internal/server/model"
-	"github.com/ekkinox/fx-template/internal/server/repository"
+	"github.com/ekkinox/fx-template/internal/repository"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
-type UpdatePostHandler struct {
+type GetPostHandler struct {
 	repository *repository.PostRepository
 }
 
-func NewUpdatePostHandler(repository *repository.PostRepository) *UpdatePostHandler {
-	return &UpdatePostHandler{
+func NewGetPostHandler(repository *repository.PostRepository) *GetPostHandler {
+	return &GetPostHandler{
 		repository: repository,
 	}
 }
 
-func (h *UpdatePostHandler) Handle() echo.HandlerFunc {
+func (h *GetPostHandler) Handle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		c.Logger().Info("in update post handler")
+		c.Logger().Info("in get post handler")
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
@@ -45,18 +44,6 @@ func (h *UpdatePostHandler) Handle() echo.HandlerFunc {
 			}
 
 			c.Logger().Errorf("cannot get post: %v", err)
-			return err
-		}
-
-		update := new(model.Post)
-		if err = c.Bind(update); err != nil {
-			c.Logger().Errorf("cannot bind post updates: %v", err)
-			return err
-		}
-
-		err = h.repository.Update(c.Request().Context(), post, update)
-		if err != nil {
-			c.Logger().Errorf("cannot update post: %v", err)
 			return err
 		}
 

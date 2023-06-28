@@ -1,4 +1,4 @@
-package server
+package http
 
 import (
 	"github.com/ekkinox/fx-template/modules/fxgorm"

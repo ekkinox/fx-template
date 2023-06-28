@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/ekkinox/fx-template/internal/server/model"
+	"github.com/ekkinox/fx-template/internal/model"
 	"gorm.io/gorm"
 )
 
