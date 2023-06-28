@@ -2,7 +2,6 @@ package fxtracer
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
@@ -33,10 +32,6 @@ func NewFxTracerProvider(p FxTracerParam) (*trace.TracerProvider, error) {
 	if p.Config.GetBool("tracing.enabled") {
 		exporter = GetExporter(p.Config.GetString("tracing.exporter"))
 	}
-
-	fmt.Printf("******************************** config enqabled %s\n", p.Config.GetBool("tracing.enabled"))
-	fmt.Printf("******************************** exporter config %s\n", p.Config.GetString("tracing.exporter"))
-	fmt.Printf("******************************** exporter %s\n", exporter.String())
 
 	tp, err := p.Factory.Create(
 		WithName(p.Config.AppName()),

@@ -2,7 +2,6 @@ package fxtracer
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/ekkinox/fx-template/modules/fxlogger"
@@ -82,7 +81,6 @@ func (f *DefaultTracerProviderFactory) createSpanExporter(ctx context.Context, o
 	case Memory:
 		return tracetest.NewInMemoryExporter(), nil
 	case Stdout:
-		fmt.Println("stdout *************************************************************")
 		exporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 		if err != nil {
 			return nil, err
