@@ -7,10 +7,12 @@ import (
 	"net"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
+	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -29,6 +31,7 @@ type FxGrpcServerParam struct {
 	LifeCycle               fx.Lifecycle
 	Config                  *fxconfig.Config
 	Logger                  *fxlogger.Logger
+	Checker                 *fxhealthchecker.Checker
 	GrpcServices            []any                   `group:"grpc-server-services"`
 	GrpcServicesDefinitions []GrpcServiceDefinition `group:"grpc-server-service-definitions"`
 }
@@ -48,6 +51,8 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 	if p.Config.GetBool("grpc.server.reflection") {
 		reflection.Register(grpcServer)
 	}
+
+	grpc_health_v1.RegisterHealthServer(grpcServer, NewGrpcHealthCheckServer(p.Checker, p.Logger))
 
 	for _, def := range p.GrpcServicesDefinitions {
 
