@@ -2,6 +2,7 @@ package fxgorm
 
 import (
 	"context"
+
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -15,7 +16,6 @@ var FxGormModule = fx.Module(
 	fx.Provide(
 		NewFxGorm,
 	),
-	fx.Invoke(func(*gorm.DB) {}),
 )
 
 type FxGormParam struct {

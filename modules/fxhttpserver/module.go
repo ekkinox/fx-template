@@ -24,7 +24,6 @@ var FxHttpServerModule = fx.Module(
 		NewFxRouter,
 		NewFxHttpServer,
 	),
-	fx.Invoke(func(*Router) {}),
 	fx.Invoke(func(*echo.Echo) {}),
 )
 

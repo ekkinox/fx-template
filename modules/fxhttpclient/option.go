@@ -7,8 +7,9 @@ import (
 )
 
 var DefaultHeadersToForward = []string{
-	"Authorization",
-	"X-Request-ID",
+	"authorization",
+	"x-request-id",
+	"traceparent",
 }
 
 type options struct {
@@ -20,7 +21,7 @@ type options struct {
 }
 
 var defaultHttpClientOptions = options{
-	Transport:        http.DefaultTransport,
+	Transport:        boostedTransport(),
 	CheckRedirect:    nil,
 	Timeout:          time.Second * 10,
 	Jar:              nil,
@@ -65,6 +66,16 @@ func WithRequestHeadersToForward(req *http.Request, headersNames []string) HttpC
 	return func(o *options) {
 		o.HeadersToForward = headersToForward
 	}
+}
+
+func boostedTransport() *http.Transport {
+	t := http.DefaultTransport.(*http.Transport).Clone()
+
+	t.MaxIdleConns = 100
+	t.MaxConnsPerHost = 100
+	t.MaxIdleConnsPerHost = 100
+
+	return t
 }
 
 func contains(slice []string, s string) bool {

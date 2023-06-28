@@ -22,5 +22,5 @@ func (s *PingServer) Ping(ctx context.Context, in *ping.PingRequest) (*ping.Ping
 
 	s.logger.Info().Msgf("called SayGoodbye with %s", in.Message)
 
-	return &ping.PingResponse{Message: "Goodbye, " + in.Message}, nil
+	return &ping.PingResponse{Message: "Your message was: " + in.Message}, nil
 }

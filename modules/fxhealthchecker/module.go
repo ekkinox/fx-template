@@ -8,7 +8,6 @@ var FxHealthCheckerModule = fx.Module("health-checker",
 	fx.Provide(
 		NewFxHealthChecker,
 	),
-	fx.Invoke(func(*Checker) {}),
 )
 
 type FxHealthCheckerParam struct {

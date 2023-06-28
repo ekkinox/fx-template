@@ -91,7 +91,6 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 
 func lookupRegisteredService(service string, params FxGrpcServerParam) (any, error) {
 	for _, s := range params.GrpcServices {
-		params.Logger.Info().Msgf("&&&&&&&&&&&& service type: %s", getType(s))
 		if getType(s) == service {
 			return s, nil
 		}
