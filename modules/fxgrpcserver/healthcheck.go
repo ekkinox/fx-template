@@ -25,7 +25,7 @@ func NewGrpcHealthCheckServer(checker *fxhealthchecker.Checker, logger *fxlogger
 
 func (s *GrpcHealthCheckServer) Check(ctx context.Context, in *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
 
-	s.logger.Info().Msgf("health check invoked with %v", in)
+	s.logger.Info().Msgf("grpc health check called by %s", in.Service)
 
 	result := s.checker.Run(ctx)
 
@@ -39,7 +39,7 @@ func (s *GrpcHealthCheckServer) Check(ctx context.Context, in *grpc_health_v1.He
 
 func (s *GrpcHealthCheckServer) Watch(in *grpc_health_v1.HealthCheckRequest, watchServer grpc_health_v1.Health_WatchServer) error {
 
-	s.logger.Info().Msgf("health watch invoked with %v", in)
+	s.logger.Info().Msgf("grpc health watch called by %s", in.Service)
 
 	return status.Error(codes.Unimplemented, "watch is not implemented")
 }
