@@ -15,12 +15,12 @@ func RegisterHandlers() fx.Option {
 		// global
 		fxhttpserver.AsMiddleware(middleware.NewGlobalMiddleware, fxhttpserver.GlobalUse),
 		// auth
-		fxhttpserver.AsHandler("GET", "/auth/context", auth.NewAuthContextHandler),
+		fxhttpserver.AsHandler("GET", "/auth", auth.NewAuthContextHandler),
 		// http
-		fxhttpserver.AsHandler("GET", "/http/ping", http.NewPingHandler, middleware.NewHandlerMiddleware),
-		fxhttpserver.AsHandler("GET", "/http/pong", http.NewPongHandler),
+		fxhttpserver.AsHandler("GET", "/ping", http.NewPingHandler, middleware.NewHandlerMiddleware),
+		fxhttpserver.AsHandler("GET", "/pong", http.NewPongHandler),
 		// pubsub
-		fxhttpserver.AsHandler("GET", "/pubsub/publish", pubsub.NewPublishHandler),
+		fxhttpserver.AsHandler("GET", "/publish", pubsub.NewPublishHandler),
 		// crud
 		fxhttpserver.AsHandlersGroup(
 			"/posts",
