@@ -11,9 +11,9 @@ grpc:
 database:
   driver: mysql
   dsn: ${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_HOST}:${MYSQL_PORT})/${MYSQL_DATABASE}?parseTime=true
-traces:
+tracing:
   enabled: ${TRACES_ENABLED}
-  collector: ${TRACES_COLLECTOR}
+  exporter: stdout
 pubsub:
   topics:
     test: test-topic

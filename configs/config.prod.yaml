@@ -1,5 +1,6 @@
 grpc:
   server:
     reflection: false
-config:
-  foo: bar-prod
+tracing:
+  exporter: otlp-grpc
+  collector: ${TRACING_COLLECTOR}
