@@ -21,7 +21,7 @@ func WithFileName(n string) ConfigOption {
 	}
 }
 
-func WithFilePaths(p []string) ConfigOption {
+func WithFilePaths(p ...string) ConfigOption {
 	return func(o *options) {
 		o.FilePaths = p
 	}

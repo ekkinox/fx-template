@@ -19,9 +19,9 @@ type FxConfigParam struct {
 func NewFxConfig(p FxConfigParam) (*Config, error) {
 	return p.Factory.Create(
 		WithFileName("config"),
-		WithFilePaths([]string{
+		WithFilePaths(
 			".",
 			"./configs",
-		}),
+		),
 	)
 }

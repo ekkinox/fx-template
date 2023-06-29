@@ -4,24 +4,20 @@ import (
 	"go.uber.org/fx"
 )
 
-var FxHealthCheckerModule = fx.Module("health-checker",
+var FxHealthCheckerModule = fx.Module(
+	"health-checker",
 	fx.Provide(
+		NewDefaultHealthCheckerFactory,
 		NewFxHealthChecker,
 	),
 )
 
 type FxHealthCheckerParam struct {
 	fx.In
-	Probes []HealthCheckerProbe `group:"health-checker-probes"`
+	Factory HealthCheckerFactory
+	Probes  []HealthCheckerProbe `group:"health-checker-probes"`
 }
 
-func NewFxHealthChecker(p FxHealthCheckerParam) *HealthChecker {
-
-	checker := NewHealthChecker()
-
-	for _, probe := range p.Probes {
-		checker.AddProbe(probe)
-	}
-
-	return checker
+func NewFxHealthChecker(p FxHealthCheckerParam) (*HealthChecker, error) {
+	return p.Factory.Create(WithProbes(p.Probes...))
 }
