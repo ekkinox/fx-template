@@ -4,6 +4,10 @@ import (
 	"github.com/rs/zerolog"
 )
 
+const (
+	Service = "service"
+)
+
 type Logger struct {
 	*zerolog.Logger
 }

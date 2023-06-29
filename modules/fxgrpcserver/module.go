@@ -31,7 +31,7 @@ type FxGrpcServerParam struct {
 	LifeCycle               fx.Lifecycle
 	Config                  *fxconfig.Config
 	Logger                  *fxlogger.Logger
-	Checker                 *fxhealthchecker.Checker
+	HealthChecker           *fxhealthchecker.HealthChecker
 	GrpcServices            []any                   `group:"grpc-server-services"`
 	GrpcServicesDefinitions []GrpcServiceDefinition `group:"grpc-server-service-definitions"`
 }
@@ -52,7 +52,7 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 		reflection.Register(grpcServer)
 	}
 
-	grpc_health_v1.RegisterHealthServer(grpcServer, NewGrpcHealthCheckServer(p.Checker, p.Logger))
+	grpc_health_v1.RegisterHealthServer(grpcServer, NewGrpcHealthCheckServer(p.HealthChecker, p.Logger))
 
 	for _, def := range p.GrpcServicesDefinitions {
 

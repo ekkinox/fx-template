@@ -34,10 +34,10 @@ var healthCheckCmd = &cobra.Command{
 			fxgorm.FxGormModule,
 			fxpubsub.FxPubSubModule,
 			fx.Provide(
-				fxhealthchecker.AsProbe(fxgorm.NewGormProbe),
-				fxhealthchecker.AsProbe(fxpubsub.NewPubSubProbe),
+				fxhealthchecker.AsHealthCheckerProbe(fxgorm.NewGormProbe),
+				fxhealthchecker.AsHealthCheckerProbe(fxpubsub.NewPubSubProbe),
 			),
-			fx.Invoke(func(c *fxhealthchecker.Checker, l *fxlogger.Logger) {
+			fx.Invoke(func(c *fxhealthchecker.HealthChecker, l *fxlogger.Logger) {
 				result := c.Run(cmd.Context())
 
 				for n, r := range result.ProbesResults {

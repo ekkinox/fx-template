@@ -11,8 +11,8 @@ import (
 func RegisterServices() fx.Option {
 	return fx.Provide(
 		// health check probes
-		fxhealthchecker.AsProbe(fxgorm.NewGormProbe),
-		fxhealthchecker.AsProbe(fxpubsub.NewPubSubProbe),
+		fxhealthchecker.AsHealthCheckerProbe(fxgorm.NewGormProbe),
+		fxhealthchecker.AsHealthCheckerProbe(fxpubsub.NewPubSubProbe),
 		// repositories
 		repository.NewPostRepository,
 	)

@@ -12,12 +12,12 @@ var FxHealthCheckerModule = fx.Module("health-checker",
 
 type FxHealthCheckerParam struct {
 	fx.In
-	Probes []Probe `group:"health-checker-probes"`
+	Probes []HealthCheckerProbe `group:"health-checker-probes"`
 }
 
-func NewFxHealthChecker(p FxHealthCheckerParam) *Checker {
+func NewFxHealthChecker(p FxHealthCheckerParam) *HealthChecker {
 
-	checker := NewChecker()
+	checker := NewHealthChecker()
 
 	for _, probe := range p.Probes {
 		checker.AddProbe(probe)

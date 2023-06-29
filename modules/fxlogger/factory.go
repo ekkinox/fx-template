@@ -27,7 +27,7 @@ func (f *DefaultLoggerFactory) Create(options ...LoggerOption) (*Logger, error) 
 	logger := log.
 		Output(appliedOpts.OutputWriter).
 		With().
-		Str("service", appliedOpts.Name).
+		Str(Service, appliedOpts.Name).
 		Logger().
 		Level(appliedOpts.Level)
 

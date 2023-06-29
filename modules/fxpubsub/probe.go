@@ -29,7 +29,7 @@ func (p *PubSubProbe) Name() string {
 	return "pubsub"
 }
 
-func (p *PubSubProbe) Check(ctx context.Context) *fxhealthchecker.ProbeResult {
+func (p *PubSubProbe) Check(ctx context.Context) *fxhealthchecker.HealthCheckerProbeResult {
 
 	success := true
 	var messages []string
@@ -51,5 +51,5 @@ func (p *PubSubProbe) Check(ctx context.Context) *fxhealthchecker.ProbeResult {
 		success = success && exist
 	}
 
-	return fxhealthchecker.NewProbeResult(success, strings.Join(messages, ", "))
+	return fxhealthchecker.NewHealthCheckerProbeResult(success, strings.Join(messages, ", "))
 }

@@ -2,31 +2,31 @@ package fxhealthchecker
 
 import "context"
 
-type CheckerResult struct {
-	Success       bool                    `json:"success"`
-	ProbesResults map[string]*ProbeResult `json:"probes"`
+type HealthCheckerResult struct {
+	Success       bool                                 `json:"success"`
+	ProbesResults map[string]*HealthCheckerProbeResult `json:"probes"`
 }
 
-type Checker struct {
-	probes []Probe
+type HealthChecker struct {
+	probes []HealthCheckerProbe
 }
 
-func NewChecker() *Checker {
-	return &Checker{
-		probes: []Probe{},
+func NewHealthChecker() *HealthChecker {
+	return &HealthChecker{
+		probes: []HealthCheckerProbe{},
 	}
 }
 
-func (c *Checker) AddProbe(p Probe) *Checker {
+func (c *HealthChecker) AddProbe(p HealthCheckerProbe) *HealthChecker {
 	c.probes = append(c.probes, p)
 
 	return c
 }
 
-func (c *Checker) Run(ctx context.Context) *CheckerResult {
+func (c *HealthChecker) Run(ctx context.Context) *HealthCheckerResult {
 
 	success := true
-	probeResults := map[string]*ProbeResult{}
+	probeResults := map[string]*HealthCheckerProbeResult{}
 
 	for _, p := range c.probes {
 
@@ -36,7 +36,7 @@ func (c *Checker) Run(ctx context.Context) *CheckerResult {
 		probeResults[p.Name()] = pr
 	}
 
-	return &CheckerResult{
+	return &HealthCheckerResult{
 		Success:       success,
 		ProbesResults: probeResults,
 	}

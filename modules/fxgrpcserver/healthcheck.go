@@ -12,14 +12,14 @@ import (
 
 type GrpcHealthCheckServer struct {
 	grpc_health_v1.UnimplementedHealthServer
-	checker *fxhealthchecker.Checker
-	logger  *fxlogger.Logger
+	healthChecker *fxhealthchecker.HealthChecker
+	logger        *fxlogger.Logger
 }
 
-func NewGrpcHealthCheckServer(checker *fxhealthchecker.Checker, logger *fxlogger.Logger) *GrpcHealthCheckServer {
+func NewGrpcHealthCheckServer(healthChecker *fxhealthchecker.HealthChecker, logger *fxlogger.Logger) *GrpcHealthCheckServer {
 	return &GrpcHealthCheckServer{
-		checker: checker,
-		logger:  logger,
+		healthChecker: healthChecker,
+		logger:        logger,
 	}
 }
 
@@ -27,7 +27,7 @@ func (s *GrpcHealthCheckServer) Check(ctx context.Context, in *grpc_health_v1.He
 
 	s.logger.Info().Msgf("grpc health check called by %s", in.Service)
 
-	result := s.checker.Run(ctx)
+	result := s.healthChecker.Run(ctx)
 
 	hcStatus := grpc_health_v1.HealthCheckResponse_SERVING
 	if !result.Success {
