@@ -28,29 +28,32 @@ type FxTracerParam struct {
 func NewFxTracerProvider(p FxTracerParam) (*trace.TracerProvider, error) {
 
 	exporter := Noop
-
 	if p.Config.GetBool("tracing.enabled") {
-		exporter = GetExporter(p.Config.GetString("tracing.exporter"))
+		exporter = FetchExporter(p.Config.GetString("tracing.exporter"))
 	}
 
-	tp, err := p.Factory.Create(
+	tracerProvider, err := p.Factory.Create(
 		WithName(p.Config.AppName()),
 		WithExporter(exporter),
 		WithCollector(p.Config.GetString("tracing.collector")),
 	)
 	if err != nil {
+		p.Logger.Error().Err(err).Msg("error creating tracer provider")
+
 		return nil, err
 	}
 
 	p.LifeCycle.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
-			if err = tp.Shutdown(ctx); err != nil {
-				p.Logger.Error().Err(err).Msgf("error shutting down tracer provider: %v")
+			if err = tracerProvider.Shutdown(ctx); err != nil {
+				p.Logger.Error().Err(err).Msg("error shutting down tracer provider")
+
 				return err
 			}
+
 			return nil
 		},
 	})
 
-	return tp, nil
+	return tracerProvider, nil
 }

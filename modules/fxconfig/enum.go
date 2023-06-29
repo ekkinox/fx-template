@@ -13,6 +13,19 @@ const (
 	Test
 )
 
+func (e AppEnv) String() string {
+	switch e {
+	case Prod:
+		return AppEnvProd
+	case Dev:
+		return AppEnvDev
+	case Test:
+		return AppEnvTest
+	default:
+		return AppEnvProd
+	}
+}
+
 func FetchAppEnv() AppEnv {
 
 	env := os.Getenv("APP_ENV")
@@ -29,18 +42,5 @@ func FetchAppEnv() AppEnv {
 		return Test
 	default:
 		return Prod
-	}
-}
-
-func (e AppEnv) String() string {
-	switch e {
-	case Prod:
-		return AppEnvProd
-	case Dev:
-		return AppEnvDev
-	case Test:
-		return AppEnvTest
-	default:
-		return AppEnvProd
 	}
 }

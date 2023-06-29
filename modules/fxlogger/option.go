@@ -1,9 +1,10 @@
 package fxlogger
 
 import (
-	"github.com/rs/zerolog"
 	"io"
 	"os"
+
+	"github.com/rs/zerolog"
 )
 
 type options struct {
@@ -12,27 +13,27 @@ type options struct {
 	OutputWriter io.Writer
 }
 
-var defaultOptions = options{
+var defaultLoggerOptions = options{
 	Name:         "default",
 	Level:        zerolog.InfoLevel,
 	OutputWriter: os.Stdout,
 }
 
-type Option func(o *options)
+type LoggerOption func(o *options)
 
-func WithName(n string) Option {
+func WithName(n string) LoggerOption {
 	return func(o *options) {
 		o.Name = n
 	}
 }
 
-func WithLevel(l zerolog.Level) Option {
+func WithLevel(l zerolog.Level) LoggerOption {
 	return func(o *options) {
 		o.Level = l
 	}
 }
 
-func WithOutputWriter(w io.Writer) Option {
+func WithOutputWriter(w io.Writer) LoggerOption {
 	return func(o *options) {
 		o.OutputWriter = w
 	}

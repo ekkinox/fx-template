@@ -26,7 +26,7 @@ func (e Exporter) String() string {
 	}
 }
 
-func GetExporter(exporter string) Exporter {
+func FetchExporter(exporter string) Exporter {
 	switch strings.ToLower(exporter) {
 	case "noop":
 		return Noop

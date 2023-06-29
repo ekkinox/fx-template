@@ -16,11 +16,11 @@ var versionCmd = &cobra.Command{
 	Short: "Application version",
 	Long:  "Print the application name and version",
 	Run: func(cmd *cobra.Command, args []string) {
-		config, err := fxconfig.NewConfig()
+		config, err := fxconfig.NewDefaultConfigFactory().Create()
 		if err != nil {
 			fmt.Printf("error getting config: %v", err)
 		}
 
-		fmt.Printf("application: %s, version: %s", config.AppName(), config.AppVersion())
+		fmt.Printf("application: %s, version: %s\n", config.AppName(), config.AppVersion())
 	},
 }
