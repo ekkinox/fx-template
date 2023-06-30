@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"runtime/debug"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
@@ -16,9 +15,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	"google.golang.org/grpc/status"
 )
 
 const DefaultPort = 50051
@@ -57,23 +54,15 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 		newResolvedGrpcService(&grpc_health_v1.Health_ServiceDesc, NewGrpcHealthCheckServer(p.HealthChecker, p.Logger)),
 	)
 
-	grpcPanicRecoveryHandler := func(pnc any) (err error) {
-		p.Logger.Error().Msgf("grpc recovering from panic, panic:%s, stack: %s", pnc, debug.Stack())
-
-		if p.Config.AppDebug() {
-			return status.Errorf(codes.Internal, "internal grpc server error, panic:%s, stack: %s", pnc, debug.Stack())
-		} else {
-			return status.Error(codes.Internal, "internal grpc server error")
-		}
-	}
+	grpcPanicRecoveryHandler := NewGrpcPanicRecoveryHandler(p.Config, p.Logger)
 
 	unaryInterceptors := []grpc.UnaryServerInterceptor{
 		logging.UnaryServerInterceptor(grpczerolog.InterceptorLogger(*p.Logger.ToZerolog())),
-		recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
+		recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler.Handle())),
 	}
 	streamInterceptors := []grpc.StreamServerInterceptor{
 		logging.StreamServerInterceptor(grpczerolog.InterceptorLogger(*p.Logger.ToZerolog())),
-		recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
+		recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler.Handle())),
 	}
 
 	if p.Config.GetBool("grpc.tracer.enabled") {

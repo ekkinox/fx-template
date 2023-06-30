@@ -115,7 +115,10 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 		})
 		// version
 		g.GET("/version", func(c echo.Context) error {
-			return c.JSON(http.StatusOK, map[string]string{"version": "0.1.0"})
+			return c.JSON(http.StatusOK, map[string]string{
+				"application": p.Config.AppName(),
+				"version":     p.Config.AppVersion(),
+			})
 		})
 	}
 
