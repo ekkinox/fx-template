@@ -57,7 +57,6 @@ func NewFxGorm(p FxGormParam) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// lifecycle
 	p.LifeCycle.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
 			db, err := orm.DB()
