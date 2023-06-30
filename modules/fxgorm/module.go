@@ -8,12 +8,12 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/fx"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var FxGormModule = fx.Module(
 	"gorm",
 	fx.Provide(
+		NewDefaultGormFactory,
 		NewFxGorm,
 	),
 )
@@ -21,6 +21,7 @@ var FxGormModule = fx.Module(
 type FxGormParam struct {
 	fx.In
 	LifeCycle      fx.Lifecycle
+	Factory        GormFactory
 	Config         *fxconfig.Config
 	Logger         *fxlogger.Logger
 	TracerProvider *trace.TracerProvider
@@ -28,26 +29,32 @@ type FxGormParam struct {
 
 func NewFxGorm(p FxGormParam) (*gorm.DB, error) {
 
-	// orm
-	logLevel := logger.Error
-	if p.Config.AppDebug() {
-		logLevel = logger.Info
-	}
-
 	config := gorm.Config{
-		Logger: NewGormLogger(p.Logger).LogMode(logLevel),
+		Logger: NewGormLogger(
+			p.Logger,
+			p.Config.GetBool("gorm.logger.with_values"),
+		).LogMode(
+			FetchLogLevel(p.Config.GetString("gorm.logger.level")),
+		),
 	}
 
-	orm, err := NewGorm(p.Config.GetString("database.driver"), p.Config.GetString("database.dsn"), config)
+	var plugins []gorm.Plugin
+	if p.Config.GetBool("gorm.tracer.enabled") {
+		plugins = append(
+			plugins,
+			NewGormTracerPlugin(p.TracerProvider, p.Config.GetBool("gorm.tracer.with_values")),
+		)
+	}
+
+	orm, err := p.Factory.Create(
+		WithDsn(p.Config.GetString("gorm.dsn")),
+		WithDriver(FetchDriver(p.Config.GetString("gorm.driver"))),
+		WithConfig(config),
+		WithPlugins(plugins...),
+	)
+
 	if err != nil {
 		return nil, err
-	}
-
-	if p.Config.AppDebug() {
-		err = orm.Use(NewGormTracerPlugin(p.TracerProvider))
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	// lifecycle

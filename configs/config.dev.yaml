@@ -1,4 +1,4 @@
 app:
   debug: true
-tracing:
-  exporter: noop
+tracer:
+  exporter: stdout

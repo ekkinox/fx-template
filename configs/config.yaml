@@ -8,11 +8,17 @@ grpc:
   server:
     port: 50051
     reflection: true
-database:
-  driver: mysql
+gorm:
   dsn: ${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_HOST}:${MYSQL_PORT})/${MYSQL_DATABASE}?parseTime=true
-tracing:
-  enabled: ${TRACES_ENABLED}
+  driver: mysql
+  logger:
+    level: debug
+    with_values: ${APP_DEBUG}
+  tracer:
+    enabled: ${TRACER_ENABLED}
+    with_values: ${APP_DEBUG}
+tracer:
+  enabled: ${TRACER_ENABLED}
   exporter: stdout
 pubsub:
   topics:

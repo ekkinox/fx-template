@@ -4,12 +4,13 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"io"
+
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
-	"io"
 )
 
 const name = "fxgorm/plugin/opentelemetry"
@@ -21,18 +22,19 @@ type gormRegister interface {
 }
 
 type GormTracerPlugin struct {
-	provider         trace.TracerProvider
-	tracer           trace.Tracer
-	excludeQueryVars bool
+	provider   trace.TracerProvider
+	tracer     trace.Tracer
+	withValues bool
 }
 
-func NewGormTracerPlugin(provider trace.TracerProvider) gorm.Plugin {
+func NewGormTracerPlugin(provider trace.TracerProvider, withValues bool) gorm.Plugin {
 
 	tracer := provider.Tracer(name)
 
 	return &GormTracerPlugin{
-		provider: provider,
-		tracer:   tracer,
+		provider:   provider,
+		tracer:     tracer,
+		withValues: withValues,
 	}
 }
 
@@ -100,8 +102,7 @@ func (p *GormTracerPlugin) after() gormHookFunc {
 		}
 
 		vars := tx.Statement.Vars
-		if p.excludeQueryVars {
-			// Replace query variables with '?' to mask them
+		if !p.withValues {
 			vars = make([]interface{}, len(tx.Statement.Vars))
 
 			for i := 0; i < len(vars); i++ {
@@ -117,13 +118,13 @@ func (p *GormTracerPlugin) after() gormHookFunc {
 		}
 
 		span.SetAttributes(attrs...)
+
 		switch tx.Error {
 		case nil,
 			gorm.ErrRecordNotFound,
 			driver.ErrSkip,
-			io.EOF, // end of rows iterator
+			io.EOF,
 			sql.ErrNoRows:
-			// ignore
 		default:
 			span.RecordError(tx.Error)
 			span.SetStatus(codes.Error, tx.Error.Error())

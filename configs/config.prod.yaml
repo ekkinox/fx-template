@@ -1,6 +1,12 @@
 grpc:
   server:
     reflection: false
-tracing:
+gorm:
+  logger:
+    level: error
+    with_values: false
+  tracer:
+    with_values: false
+tracer:
   exporter: otlp-grpc
-  collector: ${TRACING_COLLECTOR}
+  collector: ${TRACER_COLLECTOR}

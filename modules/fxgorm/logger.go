@@ -3,19 +3,22 @@ package fxgorm
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/rs/zerolog"
 	"gorm.io/gorm/logger"
-	"time"
 )
 
 type GormLogger struct {
-	logger *fxlogger.Logger
+	logger     *fxlogger.Logger
+	withValues bool
 }
 
-func NewGormLogger(logger *fxlogger.Logger) *GormLogger {
+func NewGormLogger(logger *fxlogger.Logger, withValues bool) *GormLogger {
 	return &GormLogger{
-		logger: logger,
+		logger:     logger,
+		withValues: withValues,
 	}
 }
 
@@ -60,6 +63,13 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, f func() (strin
 	event.Send()
 
 	return
+}
+
+func (l *GormLogger) ParamsFilter(ctx context.Context, sql string, params ...interface{}) (string, []interface{}) {
+	if !l.withValues {
+		return sql, nil
+	}
+	return sql, params
 }
 
 func convertGormLevel(level logger.LogLevel) zerolog.Level {
