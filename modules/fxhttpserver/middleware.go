@@ -61,7 +61,7 @@ func applyDefaultMiddlewares(e *echo.Echo, c *fxconfig.Config, l *EchoLogger) *e
 				Logger()
 
 			c.SetRequest(c.Request().WithContext(corrLogger.WithContext(c.Request().Context())))
-			c.SetLogger(NewEchoLogger(fxlogger.FromLogger(corrLogger)))
+			c.SetLogger(NewEchoLogger(fxlogger.FromZerolog(corrLogger)))
 		},
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
 			evt := l.logger.Info()

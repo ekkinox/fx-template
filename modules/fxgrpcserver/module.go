@@ -2,18 +2,23 @@ package fxgrpcserver
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net"
+	"runtime/debug"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
+	grpczerolog "github.com/grpc-ecosystem/go-grpc-middleware/providers/zerolog/v2"
+	middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
 const DefaultPort = 50051
@@ -21,19 +26,21 @@ const DefaultPort = 50051
 var FxGrpcServerModule = fx.Module(
 	"grpc-server",
 	fx.Provide(
+		NewDefaultGrpcServerFactory,
+		NewGrpcServiceRegistry,
 		NewFxGrpcServer,
 	),
-	fx.Invoke(func(*grpc.Server) {}),
+	fx.Invoke(func(*GrpcServiceRegistry, *grpc.Server) {}),
 )
 
 type FxGrpcServerParam struct {
 	fx.In
-	LifeCycle               fx.Lifecycle
-	Config                  *fxconfig.Config
-	Logger                  *fxlogger.Logger
-	HealthChecker           *fxhealthchecker.HealthChecker
-	GrpcServices            []any                   `group:"grpc-server-services"`
-	GrpcServicesDefinitions []GrpcServiceDefinition `group:"grpc-server-service-definitions"`
+	LifeCycle     fx.Lifecycle
+	Factory       GrpcServerFactory
+	Registry      *GrpcServiceRegistry
+	Config        *fxconfig.Config
+	Logger        *fxlogger.Logger
+	HealthChecker *fxhealthchecker.HealthChecker
 }
 
 func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
@@ -43,25 +50,47 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 		port = DefaultPort
 	}
 
-	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
-		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+	grpcServices, err := p.Registry.ResolveGrpcServices()
+
+	grpcServices = append(
+		grpcServices,
+		newResolvedGrpcService(&grpc_health_v1.Health_ServiceDesc, NewGrpcHealthCheckServer(p.HealthChecker, p.Logger)),
 	)
 
-	if p.Config.GetBool("grpc.server.reflection") {
-		reflection.Register(grpcServer)
+	grpcPanicRecoveryHandler := func(pnc any) (err error) {
+		p.Logger.Error().Msgf("grpc recovering from panic, panic:%s, stack: %s", pnc, debug.Stack())
+
+		if p.Config.AppDebug() {
+			return status.Errorf(codes.Internal, "internal grpc server error, panic:%s, stack: %s", pnc, debug.Stack())
+		} else {
+			return status.Error(codes.Internal, "internal grpc server error")
+		}
 	}
 
-	grpc_health_v1.RegisterHealthServer(grpcServer, NewGrpcHealthCheckServer(p.HealthChecker, p.Logger))
+	unaryInterceptors := []grpc.UnaryServerInterceptor{
+		logging.UnaryServerInterceptor(grpczerolog.InterceptorLogger(*p.Logger.ToZerolog())),
+		recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
+	}
+	streamInterceptors := []grpc.StreamServerInterceptor{
+		logging.StreamServerInterceptor(grpczerolog.InterceptorLogger(*p.Logger.ToZerolog())),
+		recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
+	}
 
-	for _, def := range p.GrpcServicesDefinitions {
+	if p.Config.GetBool("grpc.tracer.enabled") {
+		unaryInterceptors = append(unaryInterceptors, otelgrpc.UnaryServerInterceptor())
+		streamInterceptors = append(streamInterceptors, otelgrpc.StreamServerInterceptor())
+	}
 
-		service, err := lookupRegisteredService(def.Service(), p)
-		if err != nil {
-			return nil, err
-		}
-
-		grpcServer.RegisterService(def.Description(), service)
+	grpcServer, err := p.Factory.Create(
+		WithServerOptions(
+			middleware.WithUnaryServerChain(unaryInterceptors...),
+			middleware.WithStreamServerChain(streamInterceptors...),
+		),
+		WithGrpcServices(grpcServices...),
+		WithReflection(p.Config.GetBool("grpc.server.reflection")),
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	p.LifeCycle.Append(fx.Hook{
@@ -87,14 +116,4 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 	})
 
 	return grpcServer, nil
-}
-
-func lookupRegisteredService(service string, params FxGrpcServerParam) (any, error) {
-	for _, s := range params.GrpcServices {
-		if getType(s) == service {
-			return s, nil
-		}
-	}
-
-	return nil, errors.New(fmt.Sprintf("cannot find service for type %s", service))
 }

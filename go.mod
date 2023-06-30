@@ -6,6 +6,8 @@ require (
 	cloud.google.com/go/pubsub v1.28.0
 	github.com/go-errors/errors v1.4.2
 	github.com/google/uuid v1.3.0
+	github.com/grpc-ecosystem/go-grpc-middleware/providers/zerolog/v2 v2.0.0-rc.3
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0-rc.2.0.20201002093600-73cf2ae9d891
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/labstack/gommon v0.4.0
 	github.com/rs/zerolog v1.29.1

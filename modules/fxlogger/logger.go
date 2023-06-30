@@ -12,6 +12,10 @@ type Logger struct {
 	*zerolog.Logger
 }
 
-func FromLogger(logger zerolog.Logger) *Logger {
+func (l *Logger) ToZerolog() *zerolog.Logger {
+	return l.Logger
+}
+
+func FromZerolog(logger zerolog.Logger) *Logger {
 	return &Logger{&logger}
 }

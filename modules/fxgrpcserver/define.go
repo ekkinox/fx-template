@@ -4,18 +4,18 @@ import "google.golang.org/grpc"
 
 type GrpcServiceDefinition interface {
 	Description() *grpc.ServiceDesc
-	Service() string
+	ReturnType() string
 }
 
 type grpcServiceDefinition struct {
 	description *grpc.ServiceDesc
-	service     string
+	returnType  string
 }
 
-func newGrpcServiceDefinition(description *grpc.ServiceDesc, service string) *grpcServiceDefinition {
+func newGrpcServiceDefinition(description *grpc.ServiceDesc, returnType string) *grpcServiceDefinition {
 	return &grpcServiceDefinition{
 		description: description,
-		service:     service,
+		returnType:  returnType,
 	}
 }
 
@@ -23,6 +23,6 @@ func (d *grpcServiceDefinition) Description() *grpc.ServiceDesc {
 	return d.description
 }
 
-func (d *grpcServiceDefinition) Service() string {
-	return d.service
+func (d *grpcServiceDefinition) ReturnType() string {
+	return d.returnType
 }

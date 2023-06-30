@@ -7,23 +7,23 @@ type ResolvedMiddleware interface {
 	Kind() MiddlewareKind
 }
 
-type resolveMiddleware struct {
+type resolvedMiddleware struct {
 	middleware echo.MiddlewareFunc
 	kind       MiddlewareKind
 }
 
-func newResolvedMiddleware(middleware echo.MiddlewareFunc, kind MiddlewareKind) *resolveMiddleware {
-	return &resolveMiddleware{
+func newResolvedMiddleware(middleware echo.MiddlewareFunc, kind MiddlewareKind) *resolvedMiddleware {
+	return &resolvedMiddleware{
 		middleware: middleware,
 		kind:       kind,
 	}
 }
 
-func (r *resolveMiddleware) Middleware() echo.MiddlewareFunc {
+func (r *resolvedMiddleware) Middleware() echo.MiddlewareFunc {
 	return r.middleware
 }
 
-func (r *resolveMiddleware) Kind() MiddlewareKind {
+func (r *resolvedMiddleware) Kind() MiddlewareKind {
 	return r.kind
 }
 
