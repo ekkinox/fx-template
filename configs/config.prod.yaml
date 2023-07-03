@@ -7,6 +7,3 @@ gorm:
     with_values: false
   tracer:
     with_values: false
-tracer:
-  exporter: otlp-grpc
-  collector: ${TRACER_COLLECTOR}

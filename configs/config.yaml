@@ -21,7 +21,8 @@ gorm:
     with_values: ${APP_DEBUG}
 tracer:
   enabled: ${TRACER_ENABLED}
-  exporter: stdout
+  exporter: ${TRACER_EXPORTER}
+  collector: ${TRACER_COLLECTOR}
 pubsub:
   topics:
     test: test-topic
