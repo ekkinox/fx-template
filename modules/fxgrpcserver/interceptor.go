@@ -45,7 +45,6 @@ func (i *LoggerInterceptor) UnaryInterceptor() func(ctx context.Context, req int
 		resp, err := handler(newCtx, req)
 
 		if err != nil {
-
 			errStatus := status.Convert(err)
 
 			grpcLogger.
@@ -72,6 +71,7 @@ func (i *LoggerInterceptor) StreamInterceptor() func(srv interface{}, ss grpc.Se
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 
 		ctx := ss.Context()
+
 		reqId, traceParent := i.extractMetadata(ctx)
 
 		grpcLogger := i.logger.
@@ -95,7 +95,6 @@ func (i *LoggerInterceptor) StreamInterceptor() func(srv interface{}, ss grpc.Se
 		err := handler(srv, wrappedStream)
 
 		if err != nil {
-
 			errStatus := status.Convert(err)
 
 			grpcLogger.
