@@ -57,7 +57,7 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 	loggerInterceptor := NewLoggerInterceptor(p.Logger)
 
 	unaryInterceptors := []grpc.UnaryServerInterceptor{
-		loggerInterceptor.UnaryLoggerInterceptor(),
+		loggerInterceptor.UnaryInterceptor(),
 		recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler.Handle())),
 	}
 	streamInterceptors := []grpc.StreamServerInterceptor{

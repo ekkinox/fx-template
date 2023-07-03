@@ -22,7 +22,7 @@ func NewLoggerInterceptor(logger *fxlogger.Logger) *LoggerInterceptor {
 	}
 }
 
-func (i *LoggerInterceptor) UnaryLoggerInterceptor() func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+func (i *LoggerInterceptor) UnaryInterceptor() func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 
 		reqId, traceParent := i.extractMetadata(ctx)
