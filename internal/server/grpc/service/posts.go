@@ -5,6 +5,7 @@ import (
 
 	"github.com/ekkinox/fx-template/internal/model"
 	"github.com/ekkinox/fx-template/internal/repository"
+	"github.com/ekkinox/fx-template/modules/fxgrpcserver"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/ekkinox/fx-template/proto/posts"
 	"google.golang.org/grpc/codes"
@@ -16,19 +17,17 @@ import (
 type PostsCrudServer struct {
 	posts.UnimplementedPostCrudServiceServer
 	repository *repository.PostRepository
-	logger     *fxlogger.Logger
 }
 
 func NewPostsCrudServer(repository *repository.PostRepository, logger *fxlogger.Logger) *PostsCrudServer {
 	return &PostsCrudServer{
 		repository: repository,
-		logger:     logger,
 	}
 }
 
 func (s *PostsCrudServer) GetPost(ctx context.Context, in *posts.GetPostRequest) (*posts.GetPostResponse, error) {
 
-	s.logger.Info().Msg("got grpc GetPost request")
+	fxgrpcserver.CtxLogger(ctx).Info().Msg("got grpc GetPost request")
 
 	dbPost, err := s.repository.Find(ctx, int(in.Id.Value))
 	if err != nil {
@@ -43,7 +42,7 @@ func (s *PostsCrudServer) GetPost(ctx context.Context, in *posts.GetPostRequest)
 
 func (s *PostsCrudServer) CreatePost(ctx context.Context, in *posts.CreatePostRequest) (*posts.CreatePostResponse, error) {
 
-	s.logger.Info().Msg("got grpc CreatePost request")
+	fxgrpcserver.CtxLogger(ctx).Info().Msg("got grpc CreatePost request")
 
 	dbPostCreate := new(model.Post)
 	dbPostCreate.Title = in.Post.Title.GetValue()
@@ -63,7 +62,7 @@ func (s *PostsCrudServer) CreatePost(ctx context.Context, in *posts.CreatePostRe
 
 func (s *PostsCrudServer) UpdatePost(ctx context.Context, in *posts.UpdatePostRequest) (*posts.UpdatePostResponse, error) {
 
-	s.logger.Info().Msg("got grpc UpdatePost request")
+	fxgrpcserver.CtxLogger(ctx).Info().Msg("got grpc UpdatePost request")
 
 	dbPost, err := s.repository.Find(ctx, int(in.Post.Id.Value))
 	if err != nil {
@@ -94,7 +93,7 @@ func (s *PostsCrudServer) UpdatePost(ctx context.Context, in *posts.UpdatePostRe
 
 func (s *PostsCrudServer) DeletePost(ctx context.Context, in *posts.DeletePostRequest) (*posts.DeletePostResponse, error) {
 
-	s.logger.Info().Msg("got grpc DeletePost request")
+	fxgrpcserver.CtxLogger(ctx).Info().Msg("got grpc DeletePost request")
 
 	dbPost, err := s.repository.Find(ctx, int(in.Id.Value))
 	if err != nil {
@@ -113,7 +112,7 @@ func (s *PostsCrudServer) DeletePost(ctx context.Context, in *posts.DeletePostRe
 
 func (s *PostsCrudServer) ListPosts(ctx context.Context, in *emptypb.Empty) (*posts.ListPostsResponse, error) {
 
-	s.logger.Info().Msg("got grpc ListPosts request")
+	fxgrpcserver.CtxLogger(ctx).Info().Msg("got grpc ListPosts request")
 
 	dbPosts, err := s.repository.FindAll(ctx)
 	if err != nil {

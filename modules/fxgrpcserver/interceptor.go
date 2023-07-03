@@ -37,7 +37,7 @@ func (i *LoggerInterceptor) UnaryInterceptor() func(ctx context.Context, req int
 			Info().
 			Str("grpc-type", "unary").
 			Str("grpc-method", info.FullMethod).
-			Msg("grpc call started")
+			Msg("grpc call start")
 
 		newCtx := grpcLogger.WithContext(ctx)
 
@@ -46,18 +46,23 @@ func (i *LoggerInterceptor) UnaryInterceptor() func(ctx context.Context, req int
 		resp, err := handler(newCtx, req)
 
 		if err != nil {
+
+			errStatus := status.Convert(err)
+
 			grpcLogger.
 				Error().
 				Err(err).
-				Str("grpc-code", status.Convert(err).Code().String()).
+				Int32("grpc-code", int32(errStatus.Code())).
+				Str("grpc-status", errStatus.Code().String()).
 				Str("grpc-duration", time.Since(now).String()).
-				Msg("grpc call finished with error")
+				Msg("grpc call error")
 		} else {
 			grpcLogger.
 				Info().
-				Str("grpc-code", codes.OK.String()).
+				Int32("grpc-code", int32(codes.OK)).
+				Str("grpc-status", codes.OK.String()).
 				Str("grpc-duration", time.Since(now).String()).
-				Msg("grpc call finished with success")
+				Msg("grpc call success")
 		}
 
 		return resp, err
@@ -80,7 +85,7 @@ func (i *LoggerInterceptor) StreamInterceptor() func(srv interface{}, ss grpc.Se
 			Info().
 			Str("grpc-type", "server-streaming").
 			Str("grpc-method", info.FullMethod).
-			Msg("grpc call started")
+			Msg("grpc call start")
 
 		newCtx := grpcLogger.WithContext(ctx)
 
@@ -92,18 +97,23 @@ func (i *LoggerInterceptor) StreamInterceptor() func(srv interface{}, ss grpc.Se
 		err := handler(newCtx, wrapped)
 
 		if err != nil {
+
+			errStatus := status.Convert(err)
+
 			grpcLogger.
 				Error().
 				Err(err).
-				Str("grpc-code", status.Convert(err).Code().String()).
+				Int32("grpc-code", int32(errStatus.Code())).
+				Str("grpc-status", errStatus.Code().String()).
 				Str("grpc-duration", time.Since(now).String()).
-				Msg("grpc call finished with error")
+				Msg("grpc call error")
 		} else {
 			grpcLogger.
 				Info().
-				Str("grpc-code", codes.OK.String()).
+				Int32("grpc-code", int32(codes.OK)).
+				Str("grpc-status", codes.OK.String()).
 				Str("grpc-duration", time.Since(now).String()).
-				Msg("grpc call finished with success")
+				Msg("grpc call success")
 		}
 
 		return err
