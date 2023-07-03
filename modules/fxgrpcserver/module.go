@@ -8,9 +8,7 @@ import (
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
-	grpczerolog "github.com/grpc-ecosystem/go-grpc-middleware/providers/zerolog/v2"
 	middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2"
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/fx"
@@ -56,12 +54,14 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 
 	grpcPanicRecoveryHandler := NewGrpcPanicRecoveryHandler(p.Config, p.Logger)
 
+	loggerInterceptor := NewLoggerInterceptor(p.Logger)
+
 	unaryInterceptors := []grpc.UnaryServerInterceptor{
-		logging.UnaryServerInterceptor(grpczerolog.InterceptorLogger(*p.Logger.ToZerolog())),
+		loggerInterceptor.UnaryLoggerInterceptor(),
 		recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler.Handle())),
 	}
 	streamInterceptors := []grpc.StreamServerInterceptor{
-		logging.StreamServerInterceptor(grpczerolog.InterceptorLogger(*p.Logger.ToZerolog())),
+		loggerInterceptor.StreamInterceptor(),
 		recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler.Handle())),
 	}
 

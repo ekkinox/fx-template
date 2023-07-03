@@ -1,6 +1,12 @@
 package fxgorm
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
+	"gorm.io/driver/sqlserver"
+	"gorm.io/gorm"
+)
 
 type GormFactory interface {
 	Create(options ...GormOption) (*gorm.DB, error)
@@ -19,7 +25,7 @@ func (f *DefaultGormFactory) Create(options ...GormOption) (*gorm.DB, error) {
 		applyOpt(&appliedOpts)
 	}
 
-	orm, err := NewGorm(appliedOpts.Driver.String(), appliedOpts.Dsn, appliedOpts.Config)
+	orm, err := f.createDatabase(appliedOpts.Driver.String(), appliedOpts.Dsn, appliedOpts.Config)
 	if err != nil {
 		return nil, err
 	}
@@ -32,4 +38,21 @@ func (f *DefaultGormFactory) Create(options ...GormOption) (*gorm.DB, error) {
 	}
 
 	return orm, nil
+}
+
+func (f *DefaultGormFactory) createDatabase(driver string, dsn string, config gorm.Config) (*gorm.DB, error) {
+
+	var dial gorm.Dialector
+	switch FetchDriver(driver) {
+	case Sqlite:
+		dial = sqlite.Open(dsn)
+	case Mysql:
+		dial = mysql.Open(dsn)
+	case Postgres:
+		dial = postgres.Open(dsn)
+	case SqlServer:
+		dial = sqlserver.Open(dsn)
+	}
+
+	return gorm.Open(dial, &config)
 }

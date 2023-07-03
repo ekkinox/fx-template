@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/ekkinox/fx-template/modules/fxgrpcserver"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/ekkinox/fx-template/proto/ping"
 )
@@ -20,7 +21,13 @@ func NewPingServer(logger *fxlogger.Logger) *PingServer {
 
 func (s *PingServer) Ping(ctx context.Context, in *ping.PingRequest) (*ping.PingResponse, error) {
 
-	s.logger.Info().Msgf("called SayGoodbye with %s", in.Message)
+	tracer := fxgrpcserver.CtxTracer(ctx)
+	ctx, span := tracer.Start("ping")
+	defer span.End()
+
+	logger := fxgrpcserver.CtxLogger(ctx)
+	logger.Info().Msg("test 123")
+	logger.Info().Msgf("called Ping with %s", in.Message)
 
 	return &ping.PingResponse{Message: "Your message was: " + in.Message}, nil
 }
