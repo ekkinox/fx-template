@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/ekkinox/fx-template/modules/fxlogger"
-	middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -89,12 +88,11 @@ func (i *LoggerInterceptor) StreamInterceptor() func(srv interface{}, ss grpc.Se
 
 		newCtx := grpcLogger.WithContext(ctx)
 
-		wrapped := middleware.WrapServerStream(ss)
-		wrapped.WrappedContext = newCtx
+		wrappedStream := NewWrappedStream(ss, newCtx)
 
 		now := time.Now()
 
-		err := handler(newCtx, wrapped)
+		err := handler(srv, wrappedStream)
 
 		if err != nil {
 
