@@ -1,6 +1,8 @@
-package http
+package server
 
 import (
+	"context"
+
 	"github.com/ekkinox/fx-template/internal/repository"
 	"github.com/ekkinox/fx-template/modules/fxgorm"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
@@ -8,7 +10,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func RegisterServices() fx.Option {
+func RegisterServices(ctx context.Context) fx.Option {
 	return fx.Provide(
 		// health check probes
 		fxhealthchecker.AsHealthCheckerProbe(fxgorm.NewGormProbe),

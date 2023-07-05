@@ -1,11 +1,13 @@
-package http
+package server
 
 import (
+	"context"
+
 	"github.com/labstack/echo/v4"
 	"go.uber.org/fx"
 )
 
-func RegisterOverrides() fx.Option {
+func RegisterOverrides(ctx context.Context) fx.Option {
 	return fx.Options(
 		// test echo decoration
 		fx.Decorate(

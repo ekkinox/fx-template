@@ -161,7 +161,7 @@ func withDefaultMiddlewares(httpServer *echo.Echo, config *fxconfig.Config) *ech
 				Str("traceparent", c.Request().Header.Get(HeaderTraceParent)).
 				Str("remote-ip", v.RemoteIP).
 				Str("referer", v.Referer).
-				Msg("call")
+				Msg("request")
 
 			return nil
 		},

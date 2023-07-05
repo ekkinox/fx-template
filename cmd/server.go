@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/ekkinox/fx-template/internal/server"
 	"github.com/ekkinox/fx-template/internal/server/grpc"
 	"github.com/ekkinox/fx-template/internal/server/http"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
@@ -23,23 +24,26 @@ var serverCmd = &cobra.Command{
 	Long:  "HTTP Server application",
 	Run: func(cmd *cobra.Command, args []string) {
 
+		ctx := cmd.Context()
+
 		server := fx.New(
+			// logger
+			fx.WithLogger(fxlogger.FxEventLogger),
 			// core
 			fxconfig.FxConfigModule,
 			fxlogger.FxLoggerModule,
 			fxtracer.FxTracerModule,
 			fxhealthchecker.FxHealthCheckerModule,
-			// http
+			// common
+			server.RegisterModules(ctx),
+			server.RegisterServices(ctx),
+			server.RegisterOverrides(ctx),
+			// http server
 			fxhttpserver.FxHttpServerModule,
-			http.RegisterModules(),
 			http.RegisterHandlers(),
-			http.RegisterServices(),
-			http.RegisterOverrides(),
-			// grpc
+			// grpc server
 			fxgrpcserver.FxGrpcServerModule,
 			grpc.RegisterGrpcServices(),
-			// logger
-			fx.WithLogger(fxlogger.FxEventLogger),
 		)
 
 		server.Run()
