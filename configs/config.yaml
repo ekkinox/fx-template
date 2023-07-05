@@ -4,6 +4,8 @@ app:
 http:
   server:
     port: 8080
+  tracer:
+    enabled: ${TRACER_ENABLED}
 grpc:
   server:
     port: 50051

@@ -96,9 +96,6 @@ func withDefaultMiddlewares(httpServer *echo.Echo, config *fxconfig.Config) *ech
 	// recovery
 	httpServer.Use(middleware.Recover())
 
-	// open telemetry
-	httpServer.Use(otelecho.Middleware(config.AppName()))
-
 	// request-id
 	httpServer.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -170,6 +167,11 @@ func withDefaultMiddlewares(httpServer *echo.Echo, config *fxconfig.Config) *ech
 		},
 	}))
 
+	// open telemetry
+	if config.GetBool("http.tracer.enabled") {
+		httpServer.Use(otelecho.Middleware(config.AppName()))
+	}
+
 	// auth context
 	httpServer.Use(fxauthenticationcontext.Middleware())
 
@@ -238,8 +240,9 @@ func withRegisteredResources(httpServer *echo.Echo, registry *HttpServerRegistry
 func withDebugEndpoints(httpServer *echo.Echo, config *fxconfig.Config) *echo.Echo {
 	if config.AppDebug() {
 		httpServer.Logger.(*EchoLogger).Debugf("enabling debugging endpoints")
-		// group
+
 		debugGroup := httpServer.Group("/_debug")
+
 		// configs endpoint
 		debugGroup.GET("/config", func(c echo.Context) error {
 			return c.JSON(http.StatusOK, config.AllSettings())
@@ -263,6 +266,7 @@ func withDebugEndpoints(httpServer *echo.Echo, config *fxconfig.Config) *echo.Ec
 }
 
 func withHealthCheckEndpoint(httpServer *echo.Echo, healthChecker *fxhealthchecker.HealthChecker) *echo.Echo {
+	// health check endpoint
 	httpServer.GET("/_health", func(c echo.Context) error {
 		r := healthChecker.Run(c.Request().Context())
 

@@ -73,12 +73,13 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 		return nil, err
 	}
 
-	// services registration
+	// health check registration
 	grpcServer.RegisterService(
 		&grpc_health_v1.Health_ServiceDesc,
 		NewGrpcHealthCheckServer(p.HealthChecker, p.Logger),
 	)
 
+	// services registration
 	grpcServices, err := p.Registry.ResolveGrpcServices()
 	if err != nil {
 		p.Logger.Error().Err(err).Msg("failed to resolve grpc services")
