@@ -32,23 +32,23 @@ func NewFxGorm(p FxGormParam) (*gorm.DB, error) {
 	config := gorm.Config{
 		Logger: NewGormLogger(
 			p.Logger,
-			p.Config.GetBool("gorm.logger.with_values"),
+			p.Config.GetBool("modules.gorm.logger.with_values"),
 		).LogMode(
-			FetchLogLevel(p.Config.GetString("gorm.logger.level")),
+			FetchLogLevel(p.Config.GetString("modules.gorm.logger.level")),
 		),
 	}
 
 	var plugins []gorm.Plugin
-	if p.Config.GetBool("gorm.tracer.enabled") {
+	if p.Config.GetBool("modules.gorm.tracer.enabled") {
 		plugins = append(
 			plugins,
-			NewGormTracerPlugin(p.TracerProvider, p.Config.GetBool("gorm.tracer.with_values")),
+			NewGormTracerPlugin(p.TracerProvider, p.Config.GetBool("modules.gorm.tracer.with_values")),
 		)
 	}
 
 	orm, err := p.Factory.Create(
-		WithDsn(p.Config.GetString("gorm.dsn")),
-		WithDriver(FetchDriver(p.Config.GetString("gorm.driver"))),
+		WithDsn(p.Config.GetString("modules.gorm.dsn")),
+		WithDriver(FetchDriver(p.Config.GetString("modules.gorm.driver"))),
 		WithConfig(config),
 		WithPlugins(plugins...),
 	)

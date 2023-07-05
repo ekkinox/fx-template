@@ -35,7 +35,7 @@ func NewFxPubSub(p FxPubSubParam) (*pubsub.Client, error) {
 	defer cancel()
 
 	// client
-	client, err := pubsub.NewClient(ctx, p.Config.GetString("pubsub.project.id"))
+	client, err := pubsub.NewClient(ctx, p.Config.GetString("modules.pubsub.project.id"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create pubsub client: %w", err)
 	}

@@ -47,7 +47,7 @@ func (w *SubscribeWorker) Run(ctx context.Context) error {
 
 func (w *SubscribeWorker) getSubscription(ctx context.Context) (*pubsub.Subscription, error) {
 
-	topicName := w.config.GetString("pubsub.topics.test")
+	topicName := w.config.GetString("modules.pubsub.topics.test")
 	topic := w.client.Topic(topicName)
 
 	topicExists, err := topic.Exists(ctx)
@@ -65,7 +65,7 @@ func (w *SubscribeWorker) getSubscription(ctx context.Context) (*pubsub.Subscrip
 		}
 	}
 
-	subscriptionName := w.config.GetString("pubsub.subscriptions.test")
+	subscriptionName := w.config.GetString("modules.pubsub.subscriptions.test")
 	subscription := w.client.Subscription(subscriptionName)
 
 	subscriptionExists, err := subscription.Exists(ctx)
@@ -78,7 +78,7 @@ func (w *SubscribeWorker) getSubscription(ctx context.Context) (*pubsub.Subscrip
 		w.logger.Info().Msgf("subscription %s does not exist, creating it", subscriptionName)
 		subscription, err = w.client.CreateSubscription(
 			ctx,
-			w.config.GetString("pubsub.subscriptions.test"),
+			w.config.GetString("modules.pubsub.subscriptions.test"),
 			pubsub.SubscriptionConfig{
 				Topic:       topic,
 				AckDeadline: 10 * time.Second,

@@ -74,7 +74,7 @@ func NewFxHttpServer(p FxHttpServerParam) (*echo.Echo, error) {
 	// lifecycles
 	p.LifeCycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			port := p.Config.GetInt("http.server.port")
+			port := p.Config.GetInt("modules.http.server.port")
 			if port == 0 {
 				port = DefaultPort
 			}
@@ -168,12 +168,14 @@ func withDefaultMiddlewares(httpServer *echo.Echo, config *fxconfig.Config) *ech
 	}))
 
 	// open telemetry
-	if config.GetBool("http.tracer.enabled") {
+	if config.GetBool("modules.http.tracer.enabled") {
 		httpServer.Use(otelecho.Middleware(config.AppName()))
 	}
 
 	// auth context
-	httpServer.Use(fxauthenticationcontext.Middleware())
+	if config.GetBool("modules.auth.enabled") {
+		httpServer.Use(fxauthenticationcontext.Middleware(config.GetBool("modules.auth.blocking")))
+	}
 
 	return httpServer
 }

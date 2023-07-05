@@ -52,7 +52,7 @@ func (h *PublishHandler) Handle() echo.HandlerFunc {
 
 func (h *PublishHandler) getTopic(c echo.Context) (*pubsub.Topic, error) {
 
-	topicName := h.config.GetString("pubsub.topics.test")
+	topicName := h.config.GetString("modules.pubsub.topics.test")
 	topic := h.client.Topic(topicName)
 
 	exists, err := topic.Exists(c.Request().Context())

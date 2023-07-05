@@ -54,7 +54,7 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 		recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler.Handle())),
 	}
 
-	if p.Config.GetBool("grpc.tracer.enabled") {
+	if p.Config.GetBool("modules.grpc.tracer.enabled") {
 		unaryInterceptors = append(unaryInterceptors, otelgrpc.UnaryServerInterceptor())
 		streamInterceptors = append(streamInterceptors, otelgrpc.StreamServerInterceptor())
 	}
@@ -65,7 +65,7 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 			middleware.WithUnaryServerChain(unaryInterceptors...),
 			middleware.WithStreamServerChain(streamInterceptors...),
 		),
-		WithReflection(p.Config.GetBool("grpc.server.reflection")),
+		WithReflection(p.Config.GetBool("modules.grpc.server.reflection")),
 	)
 	if err != nil {
 		p.Logger.Error().Err(err).Msg("failed to create grpc server")
@@ -95,7 +95,7 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 	p.LifeCycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 
-			port := p.Config.GetInt("grpc.server.port")
+			port := p.Config.GetInt("modules.grpc.server.port")
 			if port == 0 {
 				port = DefaultPort
 			}

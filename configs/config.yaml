@@ -1,35 +1,41 @@
 app:
   name: ${APP_NAME}
-  version: "0.0.2"
-http:
-  server:
-    port: 8080
-  tracer:
-    enabled: ${TRACER_ENABLED}
-grpc:
-  server:
-    port: 50051
-    reflection: true
-  tracer:
-    enabled: ${TRACER_ENABLED}
-gorm:
-  dsn: ${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_HOST}:${MYSQL_PORT})/${MYSQL_DATABASE}?parseTime=true
-  driver: mysql
+  debug: false
+  version: "0.1.0"
+modules:
+  auth:
+    enabled: true
+    blocking: true
   logger:
-    level: debug
-    with_values: ${APP_DEBUG}
+    level: info
   tracer:
-    enabled: ${TRACER_ENABLED}
-    with_values: ${APP_DEBUG}
-tracer:
-  enabled: ${TRACER_ENABLED}
-  exporter: ${TRACER_EXPORTER}
-  collector: ${TRACER_COLLECTOR}
-pubsub:
-  topics:
-    test: test-topic
-  subscriptions:
-    test: test-topic-sub
+    enabled: true
+    exporter: noop
+  http:
+    server:
+      port: 8080
+    tracer:
+      enabled: true
+  grpc:
+    server:
+      port: 50051
+      reflection: true
+    tracer:
+      enabled: true
+  gorm:
+    dsn: ${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_HOST}:${MYSQL_PORT})/${MYSQL_DATABASE}?parseTime=true
+    driver: mysql
+    logger:
+      level: info
+      with_values: false
+    tracer:
+      enabled: ${TRACER_ENABLED}
+      with_values: false
+  pubsub:
+    topics:
+      test: test-topic
+    subscriptions:
+      test: test-topic-sub
 config:
     ping:
       url: ${PONG_URL}

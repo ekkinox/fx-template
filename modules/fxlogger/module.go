@@ -23,7 +23,7 @@ type FxLoggerParam struct {
 
 func NewFxLogger(p FxLoggerParam) (*Logger, error) {
 
-	level := zerolog.InfoLevel
+	level := FetchLogLevel(p.Config.GetString("modules.logger.level"))
 	if p.Config.AppDebug() {
 		level = zerolog.DebugLevel
 	}

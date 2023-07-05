@@ -1,4 +1,9 @@
 app:
   debug: true
-tracer:
-  exporter: noop
+modules:
+  auth:
+    blocking: false
+  logger:
+    level: debug
+  tracer:
+    exporter: stdout

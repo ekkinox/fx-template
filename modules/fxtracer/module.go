@@ -28,14 +28,14 @@ type FxTracerParam struct {
 func NewFxTracerProvider(p FxTracerParam) (*trace.TracerProvider, error) {
 
 	exporter := Noop
-	if p.Config.GetBool("tracer.enabled") {
-		exporter = FetchExporter(p.Config.GetString("tracer.exporter"))
+	if p.Config.GetBool("modules.tracer.enabled") {
+		exporter = FetchExporter(p.Config.GetString("modules.tracer.exporter"))
 	}
 
 	tracerProvider, err := p.Factory.Create(
 		WithName(p.Config.AppName()),
 		WithExporter(exporter),
-		WithCollector(p.Config.GetString("tracer.collector")),
+		WithCollector(p.Config.GetString("modules.tracer.collector")),
 	)
 	if err != nil {
 		p.Logger.Error().Err(err).Msg("error creating tracer provider")

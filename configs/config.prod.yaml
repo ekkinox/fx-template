@@ -1,9 +1,17 @@
-grpc:
-  server:
-    reflection: false
-gorm:
+app:
+  debug: false
+modules:
   logger:
-    level: error
-    with_values: false
+    level: info
   tracer:
-    with_values: false
+    exporter: otlp-grpc
+    collector: ${TRACER_COLLECTOR}
+  grpc:
+    server:
+      reflection: false
+  gorm:
+    logger:
+      level: error
+      with_values: false
+    tracer:
+      with_values: false

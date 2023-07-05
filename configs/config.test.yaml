@@ -1,2 +1,3 @@
-tracer:
-  exporter: memory
+modules:
+  tracer:
+    exporter: memory
