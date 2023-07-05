@@ -21,7 +21,7 @@ func RegisterHandlers() fx.Option {
 		fxhttpserver.AsHandler("GET", "/pong", http.NewPongHandler),
 		// pubsub
 		fxhttpserver.AsHandler("GET", "/publish", pubsub.NewPublishHandler),
-		// crud
+		// posts crud
 		fxhttpserver.AsHandlersGroup(
 			"/posts",
 			[]*fxhttpserver.HandlerRegistration{

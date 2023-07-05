@@ -6,4 +6,4 @@ modules:
   logger:
     level: debug
   tracer:
-    exporter: stdout
+    exporter: noop

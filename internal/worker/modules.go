@@ -10,6 +10,7 @@ import (
 
 func RegisterModules(ctx context.Context) fx.Option {
 	return fx.Options(
+		// pubsub
 		fxpubsub.FxPubSubModule,
 	)
 }

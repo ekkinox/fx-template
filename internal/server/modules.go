@@ -11,7 +11,9 @@ import (
 
 func RegisterModules(ctx context.Context) fx.Option {
 	return fx.Options(
+		// orm
 		fxgorm.FxGormModule,
+		// pubsub
 		fxpubsub.FxPubSubModule,
 	)
 }
