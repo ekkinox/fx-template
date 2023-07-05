@@ -2,16 +2,12 @@ package fxhttpserver
 
 import (
 	"fmt"
+	"io"
+
 	"github.com/ekkinox/fx-template/modules/fxlogger"
-	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"github.com/rs/zerolog"
-	"io"
-	"strings"
 )
-
-var headerRequestID = strings.ToLower(echo.HeaderXRequestID)
-var headerTraceParent = "traceparent"
 
 type EchoLogger struct {
 	logger *fxlogger.Logger
@@ -22,6 +18,10 @@ func NewEchoLogger(logger *fxlogger.Logger) *EchoLogger {
 	return &EchoLogger{
 		logger: logger,
 	}
+}
+
+func (e *EchoLogger) ToZerolog() *zerolog.Logger {
+	return e.logger.ToZerolog()
 }
 
 func (e *EchoLogger) SetLogger(logger *fxlogger.Logger) *EchoLogger {

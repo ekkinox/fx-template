@@ -6,22 +6,27 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ekkinox/fx-template/modules/fxauthenticationcontext"
 	"github.com/ekkinox/fx-template/modules/fxconfig"
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/fx"
 )
 
-const DefaultPort = 8080
+const (
+	DefaultPort       = 8080
+	HeaderXRequestId  = "x-request-id"
+	HeaderTraceParent = "traceparent"
+)
 
 var FxHttpServerModule = fx.Module(
 	"http-server",
-	// modules dependencies
-	fxhealthchecker.FxHealthCheckerModule,
-	// http server
 	fx.Provide(
-		NewFxRouter,
+		NewDefaultHttpServerFactory,
+		NewFxHttpServerRegistry,
 		NewFxHttpServer,
 	),
 	fx.Invoke(func(*echo.Echo) {}),
@@ -30,109 +35,41 @@ var FxHttpServerModule = fx.Module(
 type FxHttpServerParam struct {
 	fx.In
 	LifeCycle     fx.Lifecycle
+	Factory       HttpServerFactory
+	Registry      *HttpServerRegistry
 	Config        *fxconfig.Config
 	Logger        *fxlogger.Logger
 	HealthChecker *fxhealthchecker.HealthChecker
-	Router        *Router
 }
 
-func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
+func NewFxHttpServer(p FxHttpServerParam) (*echo.Echo, error) {
 	// logger
-	l := NewEchoLogger(p.Logger)
+	echoLogger := NewEchoLogger(p.Logger)
 
-	// echo
-	e := echo.New()
-	e.HideBanner = true
-	e.Debug = p.Config.AppDebug()
-	e.Logger = l
-	e.HTTPErrorHandler = NewHttpServerErrorHandler(p.Config)
-
-	// middlewares
-	e = applyDefaultMiddlewares(e, p.Config, l)
-
-	// groups
-	resolvedHandlersGroups, err := p.Router.ResolveHandlersGroups()
+	// server
+	httpServer, err := p.Factory.Create(
+		WithDebug(p.Config.AppDebug()),
+		WithBanner(false),
+		WithLogger(echoLogger),
+		WithHttpErrorHandler(NewHttpServerErrorHandler(p.Config)),
+	)
 	if err != nil {
-		l.Error("cannot resolve router handlers groups: %v", err)
+		p.Logger.Error().Err(err).Msg("failed to create http server")
+
+		return nil, err
 	}
 
-	for _, g := range resolvedHandlersGroups {
-		group := e.Group(g.Prefix(), g.Middlewares()...)
-		for _, h := range g.Handlers() {
-			group.Add(
-				strings.ToUpper(h.Method()),
-				h.Path(),
-				h.Handler(),
-				h.Middlewares()...,
-			)
-			l.Debugf("registering handler in group for [%s]%s%s", h.Method(), g.Prefix(), h.Path())
-		}
-		l.Debugf("registered handlers group for prefix %s", g.Prefix())
-	}
+	// default middlewares
+	httpServer = withDefaultMiddlewares(httpServer, p.Config, echoLogger)
 
-	// middlewares
-	resolvedMiddlewares, err := p.Router.ResolveMiddlewares()
-	if err != nil {
-		l.Error("cannot resolve router middlewares: %v", err)
-	}
-
-	for _, m := range resolvedMiddlewares {
-		if m.Kind() == GlobalPre {
-			e.Pre(m.Middleware())
-		}
-		if m.Kind() == GlobalUse {
-			e.Use(m.Middleware())
-		}
-		l.Debugf("registered %s middleware %T", m.Kind().String(), m.Middleware())
-	}
-
-	// handlers
-	resolvedHandlers, err := p.Router.ResolveHandlers()
-	if err != nil {
-		l.Error("cannot resolve router handlers: %v", err)
-	}
-
-	for _, h := range resolvedHandlers {
-		e.Add(
-			strings.ToUpper(h.Method()),
-			h.Path(),
-			h.Handler(),
-			h.Middlewares()...,
-		)
-		l.Debugf("registered handler for [%s]%s", h.Method(), h.Path())
-	}
+	// registry resources
+	httpServer = withRegisteredResources(httpServer, p.Registry, echoLogger)
 
 	// debuggers
-	if p.Config.AppDebug() {
-		g := e.Group("/_debug")
-		// configs
-		g.GET("/config", func(c echo.Context) error {
-			return c.JSON(http.StatusOK, p.Config.AllSettings())
-		})
-		// routes
-		g.GET("/routes", func(c echo.Context) error {
-			return c.JSON(http.StatusOK, e.Routes())
-		})
-		// version
-		g.GET("/version", func(c echo.Context) error {
-			return c.JSON(http.StatusOK, map[string]string{
-				"application": p.Config.AppName(),
-				"version":     p.Config.AppVersion(),
-			})
-		})
-	}
+	httpServer = withDebuggers(httpServer, p.Config, echoLogger)
 
 	// health checker
-	e.GET("/_health", func(c echo.Context) error {
-		r := p.HealthChecker.Run(c.Request().Context())
-
-		status := http.StatusOK
-		if !r.Success {
-			status = http.StatusInternalServerError
-		}
-
-		return c.JSON(status, r)
-	})
+	httpServer = withHealthChecker(httpServer, p.HealthChecker)
 
 	// lifecycles
 	p.LifeCycle.Append(fx.Hook{
@@ -142,15 +79,197 @@ func NewFxHttpServer(p FxHttpServerParam) *echo.Echo {
 				port = DefaultPort
 			}
 
-			go e.Start(fmt.Sprintf(":%d", port))
+			go httpServer.Start(fmt.Sprintf(":%d", port))
 
 			return nil
 
 		},
 		OnStop: func(ctx context.Context) error {
-			return e.Shutdown(ctx)
+			return httpServer.Shutdown(ctx)
 		},
 	})
 
-	return e
+	return httpServer, nil
+}
+
+func withDefaultMiddlewares(httpServer *echo.Echo, config *fxconfig.Config, echoLogger *EchoLogger) *echo.Echo {
+	// recovery
+	httpServer.Use(middleware.Recover())
+
+	// open telemetry
+	httpServer.Use(otelecho.Middleware(config.AppName()))
+
+	// request-id
+	httpServer.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			req := c.Request()
+			res := c.Response()
+			rid := req.Header.Get(echo.HeaderXRequestID)
+			if rid == "" {
+				rid = generateRequestId()
+				req.Header.Set(echo.HeaderXRequestID, rid)
+			}
+			res.Header().Set(echo.HeaderXRequestID, rid)
+
+			return next(c)
+		}
+	})
+
+	// logger
+	httpServer.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogMethod:    true,
+		LogURI:       true,
+		LogStatus:    true,
+		LogRequestID: true,
+		LogLatency:   true,
+		LogUserAgent: true,
+		LogRemoteIP:  true,
+		LogReferer:   true,
+		LogError:     true,
+		BeforeNextFunc: func(c echo.Context) {
+			requestId := c.Request().Header.Get(HeaderXRequestId)
+			if requestId == "" {
+				requestId = c.Response().Header().Get(HeaderXRequestId)
+			}
+
+			traceParent := c.Request().Header.Get(HeaderTraceParent)
+			if traceParent == "" {
+				traceParent = c.Response().Header().Get(HeaderTraceParent)
+			}
+
+			newLogger := echoLogger.
+				logger.
+				With().
+				Str(HeaderXRequestId, requestId).
+				Str(HeaderTraceParent, traceParent).
+				Logger()
+
+			c.SetRequest(c.Request().WithContext(newLogger.WithContext(c.Request().Context())))
+			c.SetLogger(NewEchoLogger(fxlogger.FromZerolog(newLogger)))
+		},
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			evt := echoLogger.logger.Info()
+			if v.Error != nil {
+				evt = echoLogger.logger.Error().Err(v.Error)
+			}
+
+			evt.
+				Str("method", v.Method).
+				Str("uri", v.URI).
+				Int("status", v.Status).
+				Str("latency", v.Latency.String()).
+				Str("x-request-id", v.RequestID).
+				Str("traceparent", c.Request().Header.Get(HeaderTraceParent)).
+				Str("remote-ip", v.RemoteIP).
+				Str("referer", v.Referer).
+				Msg("call")
+
+			return nil
+		},
+	}))
+
+	// auth context
+	httpServer.Use(fxauthenticationcontext.Middleware())
+
+	return httpServer
+}
+
+func withRegisteredResources(httpServer *echo.Echo, registry *HttpServerRegistry, echoLogger *EchoLogger) *echo.Echo {
+	// groups
+	resolvedHandlersGroups, err := registry.ResolveHandlersGroups()
+	if err != nil {
+		echoLogger.Error("cannot resolve router handlers groups: %v", err)
+	}
+
+	for _, g := range resolvedHandlersGroups {
+		group := httpServer.Group(g.Prefix(), g.Middlewares()...)
+		for _, h := range g.Handlers() {
+			group.Add(
+				strings.ToUpper(h.Method()),
+				h.Path(),
+				h.Handler(),
+				h.Middlewares()...,
+			)
+			echoLogger.Debugf("registering handler in group for [%s]%s%s", h.Method(), g.Prefix(), h.Path())
+		}
+		echoLogger.Debugf("registered handlers group for prefix %s", g.Prefix())
+	}
+
+	// middlewares
+	resolvedMiddlewares, err := registry.ResolveMiddlewares()
+	if err != nil {
+		echoLogger.Error("cannot resolve router middlewares: %v", err)
+	}
+
+	for _, m := range resolvedMiddlewares {
+		if m.Kind() == GlobalPre {
+			httpServer.Pre(m.Middleware())
+		}
+		if m.Kind() == GlobalUse {
+			httpServer.Use(m.Middleware())
+		}
+		echoLogger.Debugf("registered %s middleware %T", m.Kind().String(), m.Middleware())
+	}
+
+	// handlers
+	resolvedHandlers, err := registry.ResolveHandlers()
+	if err != nil {
+		echoLogger.Error("cannot resolve router handlers: %v", err)
+	}
+
+	for _, h := range resolvedHandlers {
+		httpServer.Add(
+			strings.ToUpper(h.Method()),
+			h.Path(),
+			h.Handler(),
+			h.Middlewares()...,
+		)
+		echoLogger.Debugf("registered handler for [%s]%s", h.Method(), h.Path())
+	}
+
+	return httpServer
+}
+
+func withDebuggers(httpServer *echo.Echo, config *fxconfig.Config, echoLogger *EchoLogger) *echo.Echo {
+	if config.AppDebug() {
+
+		echoLogger.Debugf("enabling debugging endpoints")
+
+		debugGroup := httpServer.Group("/_debug")
+
+		// configs
+		debugGroup.GET("/config", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, config.AllSettings())
+		})
+
+		// routes
+		debugGroup.GET("/routes", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, httpServer.Routes())
+		})
+
+		// version
+		debugGroup.GET("/version", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, map[string]string{
+				"application": config.AppName(),
+				"version":     config.AppVersion(),
+			})
+		})
+	}
+
+	return httpServer
+}
+
+func withHealthChecker(httpServer *echo.Echo, healthChecker *fxhealthchecker.HealthChecker) *echo.Echo {
+	httpServer.GET("/_health", func(c echo.Context) error {
+		r := healthChecker.Run(c.Request().Context())
+
+		status := http.StatusOK
+		if !r.Success {
+			status = http.StatusInternalServerError
+		}
+
+		return c.JSON(status, r)
+	})
+
+	return httpServer
 }

@@ -16,7 +16,7 @@ type Handler interface {
 	Handle() echo.HandlerFunc
 }
 
-type Router struct {
+type HttpServerRegistry struct {
 	middlewares              []Middleware
 	middlewareDefinitions    []MiddlewareDefinition
 	handlers                 []Handler
@@ -24,7 +24,7 @@ type Router struct {
 	handlersGroupDefinitions []HandlersGroupDefinition
 }
 
-type FxRouterParam struct {
+type FxHttpServerRegistryParam struct {
 	fx.In
 	Middlewares              []Middleware              `group:"http-server-middlewares"`
 	MiddlewareDefinitions    []MiddlewareDefinition    `group:"http-server-middleware-definitions"`
@@ -33,8 +33,8 @@ type FxRouterParam struct {
 	HandlersGroupDefinitions []HandlersGroupDefinition `group:"http-server-handlers-group-definitions"`
 }
 
-func NewFxRouter(p FxRouterParam) *Router {
-	return &Router{
+func NewFxHttpServerRegistry(p FxHttpServerRegistryParam) *HttpServerRegistry {
+	return &HttpServerRegistry{
 		middlewares:              p.Middlewares,
 		middlewareDefinitions:    p.MiddlewareDefinitions,
 		handlers:                 p.Handlers,
@@ -43,7 +43,7 @@ func NewFxRouter(p FxRouterParam) *Router {
 	}
 }
 
-func (r *Router) ResolveMiddlewares() ([]ResolvedMiddleware, error) {
+func (r *HttpServerRegistry) ResolveMiddlewares() ([]ResolvedMiddleware, error) {
 	var resolvedMiddlewares []ResolvedMiddleware
 
 	for _, middlewareDef := range r.middlewareDefinitions {
@@ -75,7 +75,7 @@ func (r *Router) ResolveMiddlewares() ([]ResolvedMiddleware, error) {
 	return resolvedMiddlewares, nil
 }
 
-func (r *Router) ResolveHandlers() ([]ResolvedHandler, error) {
+func (r *HttpServerRegistry) ResolveHandlers() ([]ResolvedHandler, error) {
 
 	var resolvedHandlers []ResolvedHandler
 
@@ -127,7 +127,7 @@ func (r *Router) ResolveHandlers() ([]ResolvedHandler, error) {
 	return resolvedHandlers, nil
 }
 
-func (r *Router) ResolveHandlersGroups() ([]ResolvedHandlersGroup, error) {
+func (r *HttpServerRegistry) ResolveHandlersGroups() ([]ResolvedHandlersGroup, error) {
 
 	var resolvedHandlersGroups []ResolvedHandlersGroup
 
@@ -209,7 +209,7 @@ func (r *Router) ResolveHandlersGroups() ([]ResolvedHandlersGroup, error) {
 	return resolvedHandlersGroups, nil
 }
 
-func (r *Router) lookupRegisteredMiddleware(middleware string) (Middleware, error) {
+func (r *HttpServerRegistry) lookupRegisteredMiddleware(middleware string) (Middleware, error) {
 	for _, m := range r.middlewares {
 		if getType(m) == middleware {
 			return m, nil
@@ -219,7 +219,7 @@ func (r *Router) lookupRegisteredMiddleware(middleware string) (Middleware, erro
 	return nil, errors.New(fmt.Sprintf("cannot find middleware for type %s", middleware))
 }
 
-func (r *Router) lookupRegisteredHandler(handler string) (Handler, error) {
+func (r *HttpServerRegistry) lookupRegisteredHandler(handler string) (Handler, error) {
 	for _, h := range r.handlers {
 		if getType(h) == handler {
 			return h, nil

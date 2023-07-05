@@ -18,7 +18,7 @@ type FxGrpcServiceRegistryParam struct {
 	GrpcServicesDefinitions []GrpcServiceDefinition `group:"grpc-server-service-definitions"`
 }
 
-func NewGrpcServiceRegistry(p FxGrpcServiceRegistryParam) *GrpcServiceRegistry {
+func NewFxGrpcServiceRegistry(p FxGrpcServiceRegistryParam) *GrpcServiceRegistry {
 	return &GrpcServiceRegistry{
 		grpcServices:            p.GrpcServices,
 		grpcServicesDefinitions: p.GrpcServicesDefinitions,

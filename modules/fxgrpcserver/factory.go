@@ -28,9 +28,5 @@ func (f *DefaultGrpcServerFactory) Create(options ...GrpcServerOption) (*grpc.Se
 		reflection.Register(grpcServer)
 	}
 
-	for _, svc := range appliedOpts.GrpcServices {
-		grpcServer.RegisterService(svc.Description(), svc.Implementation())
-	}
-
 	return grpcServer, nil
 }

@@ -23,12 +23,12 @@ func NewSubscribeWorker(config *fxconfig.Config, logger *fxlogger.Logger, client
 	}
 }
 
-func (w *SubscribeWorker) Run() error {
-
-	ctx := context.Background()
+func (w *SubscribeWorker) Run(ctx context.Context) error {
 
 	subscription, err := w.getSubscription(ctx)
 	if err != nil {
+		w.logger.Error().Err(err).Msg("cannot get subscription")
+
 		return err
 	}
 

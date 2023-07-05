@@ -22,7 +22,7 @@ var FxGrpcServerModule = fx.Module(
 	"grpc-server",
 	fx.Provide(
 		NewDefaultGrpcServerFactory,
-		NewGrpcServiceRegistry,
+		NewFxGrpcServiceRegistry,
 		NewFxGrpcServer,
 	),
 	fx.Invoke(func(*GrpcServiceRegistry, *grpc.Server) {}),
@@ -40,18 +40,7 @@ type FxGrpcServerParam struct {
 
 func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 
-	port := p.Config.GetInt("grpc.server.port")
-	if port == 0 {
-		port = DefaultPort
-	}
-
-	grpcServices, err := p.Registry.ResolveGrpcServices()
-
-	grpcServices = append(
-		grpcServices,
-		newResolvedGrpcService(&grpc_health_v1.Health_ServiceDesc, NewGrpcHealthCheckServer(p.HealthChecker, p.Logger)),
-	)
-
+	// interceptors
 	grpcPanicRecoveryHandler := NewGrpcPanicRecoveryHandler(p.Config, p.Logger)
 
 	loggerInterceptor := NewLoggerInterceptor(p.Logger)
@@ -70,20 +59,46 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 		streamInterceptors = append(streamInterceptors, otelgrpc.StreamServerInterceptor())
 	}
 
+	// server
 	grpcServer, err := p.Factory.Create(
 		WithServerOptions(
 			middleware.WithUnaryServerChain(unaryInterceptors...),
 			middleware.WithStreamServerChain(streamInterceptors...),
 		),
-		WithGrpcServices(grpcServices...),
 		WithReflection(p.Config.GetBool("grpc.server.reflection")),
 	)
 	if err != nil {
+		p.Logger.Error().Err(err).Msg("failed to create grpc server")
+
 		return nil, err
 	}
 
+	// services registration
+	grpcServer.RegisterService(
+		&grpc_health_v1.Health_ServiceDesc,
+		NewGrpcHealthCheckServer(p.HealthChecker, p.Logger),
+	)
+
+	grpcServices, err := p.Registry.ResolveGrpcServices()
+	if err != nil {
+		p.Logger.Error().Err(err).Msg("failed to resolve grpc services")
+
+		return nil, err
+	}
+
+	for _, service := range grpcServices {
+		grpcServer.RegisterService(service.Description(), service.Implementation())
+	}
+
+	// lifecycles
 	p.LifeCycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
+
+			port := p.Config.GetInt("grpc.server.port")
+			if port == 0 {
+				port = DefaultPort
+			}
+
 			go func() {
 				lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 				if err != nil {
