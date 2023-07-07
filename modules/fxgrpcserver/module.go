@@ -107,7 +107,7 @@ func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {
 				}
 
 				if err = grpcServer.Serve(lis); err != nil {
-					p.Logger.Error().Err(err).Msgf("failed to serve grpc server", port)
+					p.Logger.Error().Err(err).Msg("failed to serve grpc server")
 				}
 			}()
 

@@ -14,7 +14,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func BootstrapServer(ctx context.Context) *fx.App {
+func BootstrapServer(ctx context.Context, options ...fx.Option) *fx.App {
 	return fx.New(
 		// logger
 		fx.WithLogger(fxlogger.FxEventLogger),
@@ -33,5 +33,7 @@ func BootstrapServer(ctx context.Context) *fx.App {
 		// grpc server
 		fxgrpcserver.FxGrpcServerModule,
 		grpc.RegisterGrpcServices(),
+		//options
+		fx.Options(options...),
 	)
 }

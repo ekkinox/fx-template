@@ -26,12 +26,17 @@ func (e AppEnv) String() string {
 	}
 }
 
-func FetchAppEnv() AppEnv {
+func FetchAppEnvFromEnv() AppEnv {
 
 	env := os.Getenv("APP_ENV")
 	if env == "" {
 		env = DefaultAppEnv
 	}
+
+	return FetchAppEnv(env)
+}
+
+func FetchAppEnv(env string) AppEnv {
 
 	switch strings.ToLower(env) {
 	case AppEnvProd:

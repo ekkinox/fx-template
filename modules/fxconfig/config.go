@@ -22,8 +22,8 @@ func (c *Config) AppName() string {
 	return c.GetString("app.name")
 }
 
-func (c *Config) AppEnv() string {
-	return c.GetString("app.env")
+func (c *Config) AppEnv() AppEnv {
+	return FetchAppEnv(c.GetString("app.env"))
 }
 
 func (c *Config) AppVersion() string {

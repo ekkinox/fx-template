@@ -1,6 +1,8 @@
 package fxconfig
 
 import (
+	"os"
+
 	"go.uber.org/fx"
 )
 
@@ -22,6 +24,7 @@ func NewFxConfig(p FxConfigParam) (*Config, error) {
 		WithFilePaths(
 			".",
 			"./configs",
+			os.Getenv("APP_CONFIG_PATH"),
 		),
 	)
 }

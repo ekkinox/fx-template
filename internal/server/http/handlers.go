@@ -19,6 +19,7 @@ func RegisterHandlers() fx.Option {
 		// http
 		fxhttpserver.AsHandler("GET", "/ping", http.NewPingHandler, middleware.NewHandlerMiddleware),
 		fxhttpserver.AsHandler("GET", "/pong", http.NewPongHandler),
+		fxhttpserver.AsHandler("GET", "/test", http.NewTestHandler),
 		// pubsub
 		fxhttpserver.AsHandler("GET", "/publish", pubsub.NewPublishHandler),
 		// posts crud

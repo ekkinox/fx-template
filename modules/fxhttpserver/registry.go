@@ -57,7 +57,7 @@ func (r *HttpServerRegistry) ResolveMiddlewares() ([]ResolvedMiddleware, error) 
 					middlewareDef.Kind(),
 				)
 			} else {
-				registeredMiddleware, err := r.lookupRegisteredMiddleware(middlewareDef.Middleware().(string))
+				registeredMiddleware, err := r.LookupRegisteredMiddleware(middlewareDef.Middleware().(string))
 				if err != nil {
 					return nil, err
 				}
@@ -91,7 +91,7 @@ func (r *HttpServerRegistry) ResolveHandlers() ([]ResolvedHandler, error) {
 					middlewareDef.Middleware().(echo.MiddlewareFunc),
 				)
 			} else {
-				registeredMiddleware, err := r.lookupRegisteredMiddleware(middlewareDef.Middleware().(string))
+				registeredMiddleware, err := r.LookupRegisteredMiddleware(middlewareDef.Middleware().(string))
 				if err != nil {
 					return nil, err
 				}
@@ -108,7 +108,7 @@ func (r *HttpServerRegistry) ResolveHandlers() ([]ResolvedHandler, error) {
 				resMiddlewares...,
 			)
 		} else {
-			registeredHandler, err := r.lookupRegisteredHandler(handlerDef.Handler().(string))
+			registeredHandler, err := r.LookupRegisteredHandler(handlerDef.Handler().(string))
 			if err != nil {
 				return nil, err
 			}
@@ -141,7 +141,7 @@ func (r *HttpServerRegistry) ResolveHandlersGroups() ([]ResolvedHandlersGroup, e
 					middlewareDef.Middleware().(echo.MiddlewareFunc),
 				)
 			} else {
-				registeredMiddleware, err := r.lookupRegisteredMiddleware(middlewareDef.Middleware().(string))
+				registeredMiddleware, err := r.LookupRegisteredMiddleware(middlewareDef.Middleware().(string))
 				if err != nil {
 					return nil, err
 				}
@@ -163,7 +163,7 @@ func (r *HttpServerRegistry) ResolveHandlersGroups() ([]ResolvedHandlersGroup, e
 						middlewareDef.Middleware().(echo.MiddlewareFunc),
 					)
 				} else {
-					registeredMiddleware, err := r.lookupRegisteredMiddleware(middlewareDef.Middleware().(string))
+					registeredMiddleware, err := r.LookupRegisteredMiddleware(middlewareDef.Middleware().(string))
 					if err != nil {
 						return nil, err
 					}
@@ -180,7 +180,7 @@ func (r *HttpServerRegistry) ResolveHandlersGroups() ([]ResolvedHandlersGroup, e
 					resMiddlewares...,
 				)
 			} else {
-				registeredHandler, err := r.lookupRegisteredHandler(handlerDef.Handler().(string))
+				registeredHandler, err := r.LookupRegisteredHandler(handlerDef.Handler().(string))
 				if err != nil {
 					return nil, err
 				}
@@ -209,7 +209,7 @@ func (r *HttpServerRegistry) ResolveHandlersGroups() ([]ResolvedHandlersGroup, e
 	return resolvedHandlersGroups, nil
 }
 
-func (r *HttpServerRegistry) lookupRegisteredMiddleware(middleware string) (Middleware, error) {
+func (r *HttpServerRegistry) LookupRegisteredMiddleware(middleware string) (Middleware, error) {
 	for _, m := range r.middlewares {
 		if getType(m) == middleware {
 			return m, nil
@@ -219,7 +219,7 @@ func (r *HttpServerRegistry) lookupRegisteredMiddleware(middleware string) (Midd
 	return nil, errors.New(fmt.Sprintf("cannot find middleware for type %s", middleware))
 }
 
-func (r *HttpServerRegistry) lookupRegisteredHandler(handler string) (Handler, error) {
+func (r *HttpServerRegistry) LookupRegisteredHandler(handler string) (Handler, error) {
 	for _, h := range r.handlers {
 		if getType(h) == handler {
 			return h, nil

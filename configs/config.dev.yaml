@@ -7,3 +7,6 @@ modules:
     level: debug
   tracer:
     exporter: noop
+config:
+  test:
+    value: dev

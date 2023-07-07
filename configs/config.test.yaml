@@ -1,3 +1,13 @@
 modules:
+  auth:
+    blocking: false
+  logger:
+    level: debug
   tracer:
     exporter: memory
+  gorm:
+    dsn: file::memory:?cache=shared
+    driver: sqlite
+config:
+  test:
+    value: testtest

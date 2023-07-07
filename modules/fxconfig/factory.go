@@ -40,7 +40,7 @@ func (f *DefaultConfigFactory) Create(options ...ConfigOption) (*Config, error) 
 		return nil, err
 	}
 
-	v.SetConfigName(fmt.Sprintf("%s.%s", appliedOptions.FileName, FetchAppEnv()))
+	v.SetConfigName(fmt.Sprintf("%s.%s", appliedOptions.FileName, FetchAppEnvFromEnv()))
 	if err := v.MergeInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return nil, err

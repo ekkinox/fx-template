@@ -41,3 +41,5 @@ config:
       url: ${PONG_URL}
     pong:
       should_fail: false
+    test:
+      value: common
