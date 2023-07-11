@@ -2,7 +2,6 @@ package http_test
 
 import (
 	"context"
-	"fmt"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -18,6 +17,7 @@ import (
 	"github.com/ekkinox/fx-template/modules/fxtracer/fxtracertest"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxtest"
 )
@@ -62,11 +62,6 @@ func TestHttpEndpoint(t *testing.T) {
 	assert.Equal(t, 200, rec.Code)
 	assert.Contains(t, rec.Body.String(), "test")
 
-	//fmt.Printf("log buffer: %s", fxloggertest.GetTestLogBufferInstance().GetBuffer().String())
-	for _, span := range fxtracertest.GetTestTraceExporterInstance().GetSpans() {
-		fmt.Printf("span attributes: %+v\n", span.Attributes)
-	}
-
 	//log assertion
 	fxloggertest.AssertHasLogRecord(t, map[string]interface{}{
 		"level":   "info",
@@ -74,5 +69,5 @@ func TestHttpEndpoint(t *testing.T) {
 	})
 
 	//trace assertion
-	//fxtracertest.AssertHasTraceSpan(t, attribute.String("key", "value"))
+	fxtracertest.AssertHasTraceSpan(t, attribute.String("test attribute name", "test attribute value"))
 }

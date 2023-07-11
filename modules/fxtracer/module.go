@@ -29,14 +29,12 @@ type FxTracerParam struct {
 func NewFxTracerProvider(p FxTracerParam) (*trace.TracerProvider, error) {
 
 	// exporter
-	var exporter Exporter
+	exporter := Noop
 	if p.Config.AppEnv() == fxconfig.Test {
 		exporter = Memory
 	} else {
 		if p.Config.GetBool("modules.tracer.enabled") {
 			exporter = FetchExporter(p.Config.GetString("modules.tracer.exporter"))
-		} else {
-			exporter = Noop
 		}
 	}
 

@@ -2,14 +2,14 @@ package fxtracer
 
 type options struct {
 	Name      string
-	Exporter  Exporter
 	Collector string
+	Exporter  Exporter
 }
 
 var defaultTracerProviderOptions = options{
 	Name:      "default",
-	Exporter:  Noop,
 	Collector: "",
+	Exporter:  Noop,
 }
 
 type TracerProviderOption func(o *options)
@@ -20,14 +20,14 @@ func WithName(n string) TracerProviderOption {
 	}
 }
 
-func WithExporter(e Exporter) TracerProviderOption {
-	return func(o *options) {
-		o.Exporter = e
-	}
-}
-
 func WithCollector(c string) TracerProviderOption {
 	return func(o *options) {
 		o.Collector = c
+	}
+}
+
+func WithExporter(e Exporter) TracerProviderOption {
+	return func(o *options) {
+		o.Exporter = e
 	}
 }

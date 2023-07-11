@@ -29,7 +29,7 @@ func (h *TestHandler) Handle() echo.HandlerFunc {
 		_, span := fxhttpserver.CtxTracer(c).Start(
 			c.Request().Context(),
 			"test span",
-			trace.WithAttributes(attribute.String("key", "*****************************************************")),
+			trace.WithAttributes(attribute.String("test attribute name", "test attribute value")),
 		)
 		defer span.End()
 

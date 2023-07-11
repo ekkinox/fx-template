@@ -53,9 +53,9 @@ func (f *DefaultTracerProviderFactory) Create(options ...TracerProviderOption) (
 		return nil, err
 	}
 
-	spanExporter, err := f.createSpanExporter(ctx, appliedOptions)
+	spanProcessor, err := f.createSpanProcessor(ctx, appliedOptions)
 	if err != nil {
-		f.logger.Error().Err(err).Msg("failed to create span exporter for tracer provider")
+		f.logger.Error().Err(err).Msg("failed to create span processor for tracer provider")
 
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (f *DefaultTracerProviderFactory) Create(options ...TracerProviderOption) (
 	tracerProvider := trace.NewTracerProvider(
 		trace.WithResource(res),
 		trace.WithSampler(trace.AlwaysSample()),
-		trace.WithBatcher(spanExporter),
+		trace.WithSpanProcessor(spanProcessor),
 	)
 
 	otel.SetTracerProvider(tracerProvider)
@@ -78,12 +78,17 @@ func (f *DefaultTracerProviderFactory) Create(options ...TracerProviderOption) (
 	return tracerProvider, nil
 }
 
-func (f *DefaultTracerProviderFactory) createSpanExporter(ctx context.Context, opts options) (trace.SpanExporter, error) {
+func (f *DefaultTracerProviderFactory) createSpanProcessor(ctx context.Context, opts options) (trace.SpanProcessor, error) {
 	switch opts.Exporter {
 	case Memory:
-		return fxtracertest.GetTestTraceExporterInstance(), nil
+		return trace.NewSimpleSpanProcessor(fxtracertest.GetTestTraceExporterInstance()), nil
 	case Stdout:
-		return stdouttrace.New(stdouttrace.WithPrettyPrint())
+		stdoutExporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
+		if err != nil {
+			return nil, err
+		}
+
+		return trace.NewBatchSpanProcessor(stdoutExporter), nil
 	case OtlpGrpc:
 		dialCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
@@ -100,15 +105,15 @@ func (f *DefaultTracerProviderFactory) createSpanExporter(ctx context.Context, o
 			return nil, err
 		}
 
-		exporter, err := otlptracegrpc.New(dialCtx, otlptracegrpc.WithGRPCConn(conn))
+		otlpGrpcExporter, err := otlptracegrpc.New(dialCtx, otlptracegrpc.WithGRPCConn(conn))
 		if err != nil {
 			f.logger.Error().Err(err).Msg("failed to create otlp-grpc span exporter")
 
 			return nil, err
 		}
 
-		return exporter, nil
+		return trace.NewBatchSpanProcessor(otlpGrpcExporter), nil
 	default:
-		return tracetest.NewNoopExporter(), nil
+		return trace.NewBatchSpanProcessor(tracetest.NewNoopExporter()), nil
 	}
 }
