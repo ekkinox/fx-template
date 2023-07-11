@@ -22,7 +22,7 @@ func NewPingServer(logger *fxlogger.Logger) *PingServer {
 func (s *PingServer) Ping(ctx context.Context, in *ping.PingRequest) (*ping.PingResponse, error) {
 
 	tracer := fxgrpcserver.CtxTracer(ctx)
-	ctx, span := tracer.Start("ping")
+	ctx, span := tracer.Start(ctx, "ping")
 	defer span.End()
 
 	logger := fxgrpcserver.CtxLogger(ctx)

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ekkinox/fx-template/modules/fxlogger"
+	"github.com/ekkinox/fx-template/modules/fxtracer/fxtracertest"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
@@ -60,12 +61,13 @@ func (f *DefaultTracerProviderFactory) Create(options ...TracerProviderOption) (
 	}
 
 	tracerProvider := trace.NewTracerProvider(
-		trace.WithSampler(trace.AlwaysSample()),
 		trace.WithResource(res),
-		trace.WithSpanProcessor(trace.NewBatchSpanProcessor(spanExporter)),
+		trace.WithSampler(trace.AlwaysSample()),
+		trace.WithBatcher(spanExporter),
 	)
 
 	otel.SetTracerProvider(tracerProvider)
+
 	otel.SetTextMapPropagator(
 		propagation.NewCompositeTextMapPropagator(
 			propagation.TraceContext{},
@@ -79,14 +81,9 @@ func (f *DefaultTracerProviderFactory) Create(options ...TracerProviderOption) (
 func (f *DefaultTracerProviderFactory) createSpanExporter(ctx context.Context, opts options) (trace.SpanExporter, error) {
 	switch opts.Exporter {
 	case Memory:
-		return tracetest.NewInMemoryExporter(), nil
+		return fxtracertest.GetTestTraceExporterInstance(), nil
 	case Stdout:
-		exporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
-		if err != nil {
-			return nil, err
-		}
-
-		return exporter, nil
+		return stdouttrace.New(stdouttrace.WithPrettyPrint())
 	case OtlpGrpc:
 		dialCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()

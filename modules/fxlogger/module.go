@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/ekkinox/fx-template/modules/fxconfig"
+	"github.com/ekkinox/fx-template/modules/fxlogger/fxloggertest"
 	"github.com/rs/zerolog"
 	"go.uber.org/fx"
 )
@@ -14,7 +15,7 @@ var FxLoggerModule = fx.Module("logger",
 		NewDefaultLoggerFactory,
 		NewFxLogger,
 		fx.Annotate(
-			GetTestLogBufferInstance,
+			fxloggertest.GetTestLogBufferInstance,
 			fx.ResultTags(`name:"test-log-buffer"`),
 		),
 	),
@@ -22,9 +23,8 @@ var FxLoggerModule = fx.Module("logger",
 
 type FxLoggerParam struct {
 	fx.In
-	Factory       LoggerFactory
-	Config        *fxconfig.Config
-	TestLogBuffer *TestLogBuffer `name:"test-log-buffer"`
+	Factory LoggerFactory
+	Config  *fxconfig.Config
 }
 
 func NewFxLogger(p FxLoggerParam) (*Logger, error) {
@@ -38,7 +38,7 @@ func NewFxLogger(p FxLoggerParam) (*Logger, error) {
 	// output writer
 	var outputWriter io.Writer
 	if p.Config.AppEnv() == fxconfig.Test {
-		outputWriter = p.TestLogBuffer
+		outputWriter = fxloggertest.GetTestLogBufferInstance()
 	} else {
 		outputWriter = os.Stdout
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/fx"
 )
 
@@ -34,12 +35,13 @@ var FxHttpServerModule = fx.Module(
 
 type FxHttpServerParam struct {
 	fx.In
-	LifeCycle     fx.Lifecycle
-	Factory       HttpServerFactory
-	Registry      *HttpServerRegistry
-	Config        *fxconfig.Config
-	Logger        *fxlogger.Logger
-	HealthChecker *fxhealthchecker.HealthChecker
+	LifeCycle      fx.Lifecycle
+	Factory        HttpServerFactory
+	Registry       *HttpServerRegistry
+	Config         *fxconfig.Config
+	Logger         *fxlogger.Logger
+	TracerProvider *trace.TracerProvider
+	HealthChecker  *fxhealthchecker.HealthChecker
 }
 
 func NewFxHttpServer(p FxHttpServerParam) (*echo.Echo, error) {
@@ -60,7 +62,7 @@ func NewFxHttpServer(p FxHttpServerParam) (*echo.Echo, error) {
 	}
 
 	// middlewares
-	httpServer = withDefaultMiddlewares(httpServer, p.Config)
+	httpServer = withDefaultMiddlewares(httpServer, p.Config, p.TracerProvider)
 
 	// registry
 	httpServer = withRegisteredResources(httpServer, p.Registry)
@@ -92,7 +94,7 @@ func NewFxHttpServer(p FxHttpServerParam) (*echo.Echo, error) {
 	return httpServer, nil
 }
 
-func withDefaultMiddlewares(httpServer *echo.Echo, config *fxconfig.Config) *echo.Echo {
+func withDefaultMiddlewares(httpServer *echo.Echo, config *fxconfig.Config, tracerProvider *trace.TracerProvider) *echo.Echo {
 
 	// recovery
 	httpServer.Use(middleware.Recover())
@@ -170,7 +172,10 @@ func withDefaultMiddlewares(httpServer *echo.Echo, config *fxconfig.Config) *ech
 
 	// open telemetry
 	if config.GetBool("modules.http.tracer.enabled") {
-		httpServer.Use(otelecho.Middleware(config.AppName()))
+		httpServer.Use(otelecho.Middleware(
+			config.AppName(),
+			otelecho.WithTracerProvider(tracerProvider),
+		))
 	}
 
 	// auth context

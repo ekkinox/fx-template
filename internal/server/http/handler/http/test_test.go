@@ -2,8 +2,10 @@ package http_test
 
 import (
 	"context"
+	"fmt"
 	"net/http/httptest"
 	"os"
+	"testing"
 
 	"github.com/ekkinox/fx-template/internal/server"
 	h "github.com/ekkinox/fx-template/internal/server/http"
@@ -11,65 +13,66 @@ import (
 	"github.com/ekkinox/fx-template/modules/fxhealthchecker"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
 	"github.com/ekkinox/fx-template/modules/fxlogger"
+	"github.com/ekkinox/fx-template/modules/fxlogger/fxloggertest"
 	"github.com/ekkinox/fx-template/modules/fxtracer"
+	"github.com/ekkinox/fx-template/modules/fxtracer/fxtracertest"
 	"github.com/labstack/echo/v4"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxtest"
 )
 
-var _ = Describe("some http test", func() {
+func TestHttpEndpoint(t *testing.T) {
 
 	ctx := context.Background()
 	var httpServer *echo.Echo
 
-	BeforeEach(func() {
-		os.Setenv("APP_ENV", "test")
-		os.Setenv("APP_CONFIG_PATH", "../../../../../configs")
-		os.Setenv("PUBSUB_PROJECT_ID", "test-project")
-		os.Setenv("PUBSUB_EMULATOR_HOST", "pubsub:8085")
+	os.Setenv("APP_ENV", "test")
+	os.Setenv("APP_CONFIG_PATH", "../../../../../configs")
+	os.Setenv("PUBSUB_PROJECT_ID", "test-project")
+	os.Setenv("PUBSUB_EMULATOR_HOST", "pubsub:8085")
 
-		fxtest.New(
-			GinkgoT(),
-			fx.NopLogger,
-			//fx.WithLogger(fxlogger.FxEventLogger),
-			// core
-			fxconfig.FxConfigModule,
-			fxlogger.FxLoggerModule,
-			fxtracer.FxTracerModule,
-			fxhealthchecker.FxHealthCheckerModule,
-			// common
-			server.RegisterModules(ctx),
-			server.RegisterServices(ctx),
-			server.RegisterOverrides(ctx),
-			// http server
-			fxhttpserver.FxHttpServerModule,
-			h.RegisterHandlers(),
-			//options
-			fx.Options(
-				fx.Populate(&httpServer),
-			),
-		).RequireStart().RequireStop()
+	fxtest.New(
+		t,
+		fx.NopLogger,
+		//fx.WithLogger(fxlogger.FxEventLogger),
+		// core
+		fxconfig.FxConfigModule,
+		fxlogger.FxLoggerModule,
+		fxtracer.FxTracerModule,
+		fxhealthchecker.FxHealthCheckerModule,
+		// common
+		server.RegisterModules(ctx),
+		server.RegisterServices(ctx),
+		server.RegisterOverrides(ctx),
+		// http server
+		fxhttpserver.FxHttpServerModule,
+		h.RegisterHandlers(),
+		//options
+		fx.Options(
+			fx.Populate(&httpServer),
+		),
+	).RequireStart().RequireStop()
+
+	req := httptest.NewRequest("GET", "/test", nil)
+	rec := httptest.NewRecorder()
+	httpServer.ServeHTTP(rec, req)
+
+	// response assertion
+	assert.Equal(t, 200, rec.Code)
+	assert.Contains(t, rec.Body.String(), "test")
+
+	//fmt.Printf("log buffer: %s", fxloggertest.GetTestLogBufferInstance().GetBuffer().String())
+	for _, span := range fxtracertest.GetTestTraceExporterInstance().GetSpans() {
+		fmt.Printf("span attributes: %+v\n", span.Attributes)
+	}
+
+	//log assertion
+	fxloggertest.AssertHasLogRecord(t, map[string]interface{}{
+		"level":   "info",
+		"message": "test log",
 	})
 
-	Describe("test /test", func() {
-		Context("calling /test", func() {
-			It("response should contain the config value", func() {
-
-				// http call
-				req := httptest.NewRequest("GET", "/test", nil)
-				rec := httptest.NewRecorder()
-				httpServer.ServeHTTP(rec, req)
-
-				// response assertion
-				Expect(200).To(Equal(rec.Code))
-				Expect(rec.Body.String()).To(ContainSubstring("test"))
-
-				// log assertion
-				buf := fxlogger.GetTestLogBufferInstance()
-				Expect(buf.HasRecord("info", "in test endpoint")).To(Equal(true))
-			})
-		})
-	})
-})
+	//trace assertion
+	//fxtracertest.AssertHasTraceSpan(t, attribute.String("key", "value"))
+}

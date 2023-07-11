@@ -8,6 +8,9 @@ modules:
   gorm:
     dsn: file::memory:?cache=shared
     driver: sqlite
+  http:
+    tracer:
+      enabled: true
 config:
   test:
     value: testtest

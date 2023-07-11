@@ -29,7 +29,7 @@ modules:
       level: info
       with_values: false
     tracer:
-      enabled: ${TRACER_ENABLED}
+      enabled: true
       with_values: false
   pubsub:
     topics:

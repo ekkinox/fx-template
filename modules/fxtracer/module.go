@@ -15,6 +15,7 @@ var FxTracerModule = fx.Module(
 		NewDefaultTracerProviderFactory,
 		NewFxTracerProvider,
 	),
+	fx.Invoke(func(*trace.TracerProvider) {}),
 )
 
 type FxTracerParam struct {
@@ -27,9 +28,16 @@ type FxTracerParam struct {
 
 func NewFxTracerProvider(p FxTracerParam) (*trace.TracerProvider, error) {
 
-	exporter := Noop
-	if p.Config.GetBool("modules.tracer.enabled") {
-		exporter = FetchExporter(p.Config.GetString("modules.tracer.exporter"))
+	// exporter
+	var exporter Exporter
+	if p.Config.AppEnv() == fxconfig.Test {
+		exporter = Memory
+	} else {
+		if p.Config.GetBool("modules.tracer.enabled") {
+			exporter = FetchExporter(p.Config.GetString("modules.tracer.exporter"))
+		} else {
+			exporter = Noop
+		}
 	}
 
 	tracerProvider, err := p.Factory.Create(
@@ -45,10 +53,18 @@ func NewFxTracerProvider(p FxTracerParam) (*trace.TracerProvider, error) {
 
 	p.LifeCycle.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
-			if err = tracerProvider.Shutdown(ctx); err != nil {
-				p.Logger.Error().Err(err).Msg("error while shutting down tracer provider")
+			if err = tracerProvider.ForceFlush(ctx); err != nil {
+				p.Logger.Error().Err(err).Msg("error flushing tracer provider")
 
 				return err
+			}
+
+			if exporter != Memory {
+				if err = tracerProvider.Shutdown(ctx); err != nil {
+					p.Logger.Error().Err(err).Msg("error while shutting down tracer provider")
+
+					return err
+				}
 			}
 
 			return nil

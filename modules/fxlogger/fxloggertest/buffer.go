@@ -1,10 +1,9 @@
-package fxlogger
+package fxloggertest
 
 import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"strings"
 	"sync"
 )
 
@@ -23,8 +22,8 @@ func GetTestLogBufferInstance() *TestLogBuffer {
 	return testLogBuffer
 }
 
-func (b *TestLogBuffer) AsString() string {
-	return b.Buffer.String()
+func (b *TestLogBuffer) GetBuffer() *bytes.Buffer {
+	return &b.Buffer
 }
 
 func (b *TestLogBuffer) ClearRecords() *TestLogBuffer {
@@ -56,20 +55,21 @@ func (b *TestLogBuffer) GetRecords() ([]*TestLogRecord, error) {
 	return records, nil
 }
 
-func (b *TestLogBuffer) HasRecord(level string, containedMessage string) bool {
+func (b *TestLogBuffer) HasRecord(expectedAttributes map[string]interface{}) (bool, error) {
 	records, err := b.GetRecords()
 	if err != nil {
-		return false
+		return false, err
 	}
 
 	for _, record := range records {
-		recordLevel, _ := record.GetLevel()
-		recordMessage, _ := record.GetMessage()
-
-		if recordLevel == level && strings.Contains(recordMessage, containedMessage) {
-			return true
+		match, err := record.MatchAttributes(expectedAttributes)
+		if err != nil {
+			return false, err
+		}
+		if match {
+			return match, err
 		}
 	}
 
-	return false
+	return false, nil
 }
