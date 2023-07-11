@@ -30,7 +30,6 @@ var FxHttpServerModule = fx.Module(
 		NewFxHttpServerRegistry,
 		NewFxHttpServer,
 	),
-	StartFxHttpServer(),
 )
 
 type FxHttpServerParam struct {

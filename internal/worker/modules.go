@@ -1,14 +1,12 @@
 package worker
 
 import (
-	"context"
-
 	"github.com/ekkinox/fx-template/modules/fxpubsub"
 
 	"go.uber.org/fx"
 )
 
-func RegisterModules(ctx context.Context) fx.Option {
+func RegisterModules() fx.Option {
 	return fx.Options(
 		// pubsub
 		fxpubsub.FxPubSubModule,

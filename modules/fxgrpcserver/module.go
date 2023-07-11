@@ -25,7 +25,6 @@ var FxGrpcServerModule = fx.Module(
 		NewFxGrpcServiceRegistry,
 		NewFxGrpcServer,
 	),
-	StartFxGrpcServer(),
 )
 
 type FxGrpcServerParam struct {
