@@ -25,7 +25,7 @@ var FxGrpcServerModule = fx.Module(
 		NewFxGrpcServiceRegistry,
 		NewFxGrpcServer,
 	),
-	fx.Invoke(func(*GrpcServiceRegistry, *grpc.Server) {}),
+	StartFxGrpcServer(),
 )
 
 type FxGrpcServerParam struct {
@@ -36,6 +36,10 @@ type FxGrpcServerParam struct {
 	Config        *fxconfig.Config
 	Logger        *fxlogger.Logger
 	HealthChecker *fxhealthchecker.HealthChecker
+}
+
+func StartFxGrpcServer() fx.Option {
+	return fx.Invoke(func(*GrpcServiceRegistry, *grpc.Server) {})
 }
 
 func NewFxGrpcServer(p FxGrpcServerParam) (*grpc.Server, error) {

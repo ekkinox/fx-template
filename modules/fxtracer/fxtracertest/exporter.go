@@ -38,12 +38,14 @@ func (e *TestTraceExporter) GetSpans() tracetest.SpanStubs {
 	return e.InMemoryExporter.GetSpans()
 }
 
-func (e *TestTraceExporter) HasSpan(expectedAttributes []attribute.KeyValue) bool {
+func (e *TestTraceExporter) HasSpan(expectedName string, expectedAttributes []attribute.KeyValue) bool {
 	for _, span := range e.InMemoryExporter.GetSpans() {
-		for _, expectedAttribute := range expectedAttributes {
-			for _, spanAttribute := range span.Attributes {
-				if spanAttribute.Key == expectedAttribute.Key && spanAttribute.Value == expectedAttribute.Value {
-					return true
+		if span.Name == expectedName {
+			for _, expectedAttribute := range expectedAttributes {
+				for _, spanAttribute := range span.Attributes {
+					if spanAttribute.Key == expectedAttribute.Key && spanAttribute.Value == expectedAttribute.Value {
+						return true
+					}
 				}
 			}
 		}

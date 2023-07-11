@@ -27,6 +27,10 @@ type FxGormParam struct {
 	TracerProvider *trace.TracerProvider
 }
 
+func StartFxGorm() fx.Option {
+	return fx.Invoke(func(*gorm.DB) {})
+}
+
 func NewFxGorm(p FxGormParam) (*gorm.DB, error) {
 
 	config := gorm.Config{

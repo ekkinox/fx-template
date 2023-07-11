@@ -30,7 +30,7 @@ var FxHttpServerModule = fx.Module(
 		NewFxHttpServerRegistry,
 		NewFxHttpServer,
 	),
-	fx.Invoke(func(*echo.Echo) {}),
+	StartFxHttpServer(),
 )
 
 type FxHttpServerParam struct {
@@ -42,6 +42,10 @@ type FxHttpServerParam struct {
 	Logger         *fxlogger.Logger
 	TracerProvider *trace.TracerProvider
 	HealthChecker  *fxhealthchecker.HealthChecker
+}
+
+func StartFxHttpServer() fx.Option {
+	return fx.Invoke(func(*echo.Echo) {})
 }
 
 func NewFxHttpServer(p FxHttpServerParam) (*echo.Echo, error) {

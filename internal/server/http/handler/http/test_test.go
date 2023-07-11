@@ -69,5 +69,5 @@ func TestHttpEndpoint(t *testing.T) {
 	})
 
 	//trace assertion
-	fxtracertest.AssertHasTraceSpan(t, attribute.String("test attribute name", "test attribute value"))
+	fxtracertest.AssertHasTraceSpan(t, "test span", attribute.String("test attribute name", "test attribute value"))
 }

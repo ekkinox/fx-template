@@ -12,7 +12,7 @@ func AssertHasLogRecord(t testing.TB, expectedAttributes map[string]interface{})
 	}
 
 	if !hasRecord {
-		t.Errorf("cannot find log record with attributes %v", expectedAttributes)
+		t.Errorf("cannot find log record with attributes %+v", expectedAttributes)
 
 		return false
 	}

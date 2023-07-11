@@ -6,9 +6,9 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 )
 
-func AssertHasTraceSpan(t testing.TB, expectedAttributes ...attribute.KeyValue) bool {
-	if !GetTestTraceExporterInstance().HasSpan(expectedAttributes) {
-		t.Errorf("cannot find trace span with attributes %v", expectedAttributes)
+func AssertHasTraceSpan(t testing.TB, expectedName string, expectedAttributes ...attribute.KeyValue) bool {
+	if !GetTestTraceExporterInstance().HasSpan(expectedName, expectedAttributes) {
+		t.Errorf("cannot find trace span with name %s and attributes %+v", expectedName, expectedAttributes)
 
 		return false
 	}
