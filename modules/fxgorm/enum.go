@@ -10,7 +10,7 @@ type Driver int
 
 const (
 	Unknown Driver = iota
-	Sqlite
+	Sqlite3
 	Mysql
 	Postgres
 	SqlServer
@@ -18,8 +18,8 @@ const (
 
 func (d Driver) String() string {
 	switch d {
-	case Sqlite:
-		return "sqlite"
+	case Sqlite3:
+		return "sqlite3"
 	case Mysql:
 		return "mysql"
 	case Postgres:
@@ -33,8 +33,8 @@ func (d Driver) String() string {
 
 func FetchDriver(driver string) Driver {
 	switch strings.ToLower(driver) {
-	case "sqlite":
-		return Sqlite
+	case "sqlite3":
+		return Sqlite3
 	case "mysql":
 		return Mysql
 	case "postgres":

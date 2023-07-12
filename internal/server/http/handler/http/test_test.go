@@ -14,7 +14,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func TestHttpEndpoint(t *testing.T) {
+func TestHttpHandler(t *testing.T) {
 
 	// test env vars
 	t.Setenv("APP_CONFIG_PATH", "../../../../../configs")

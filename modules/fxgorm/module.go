@@ -50,9 +50,11 @@ func NewFxGorm(p FxGormParam) (*gorm.DB, error) {
 		)
 	}
 
+	driver := FetchDriver(p.Config.GetString("modules.gorm.driver"))
+
 	orm, err := p.Factory.Create(
 		WithDsn(p.Config.GetString("modules.gorm.dsn")),
-		WithDriver(FetchDriver(p.Config.GetString("modules.gorm.driver"))),
+		WithDriver(driver),
 		WithConfig(config),
 		WithPlugins(plugins...),
 	)
@@ -63,12 +65,16 @@ func NewFxGorm(p FxGormParam) (*gorm.DB, error) {
 
 	p.LifeCycle.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
-			db, err := orm.DB()
-			if err != nil {
-				return err
+			if driver != Sqlite3 {
+				db, err := orm.DB()
+				if err != nil {
+					return err
+				}
+
+				return db.Close()
 			}
 
-			return db.Close()
+			return nil
 		},
 	})
 

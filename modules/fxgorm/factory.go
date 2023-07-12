@@ -44,7 +44,7 @@ func (f *DefaultGormFactory) createDatabase(driver string, dsn string, config go
 
 	var dial gorm.Dialector
 	switch FetchDriver(driver) {
-	case Sqlite:
+	case Sqlite3:
 		dial = sqlite.Open(dsn)
 	case Mysql:
 		dial = mysql.Open(dsn)

@@ -7,7 +7,7 @@ modules:
     exporter: memory
   gorm:
     dsn: file::memory:?cache=shared
-    driver: sqlite
+    driver: sqlite3
   http:
     tracer:
       enabled: true
