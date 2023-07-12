@@ -6,10 +6,10 @@ import (
 
 	"github.com/ekkinox/fx-template/internal/server"
 	"github.com/ekkinox/fx-template/modules/fxhttpserver"
+	"github.com/ekkinox/fx-template/modules/fxhttpserver/fxhttpservertest"
 	"github.com/ekkinox/fx-template/modules/fxlogger/fxloggertest"
 	"github.com/ekkinox/fx-template/modules/fxtracer/fxtracertest"
 	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/fx"
 )
@@ -30,13 +30,12 @@ func TestHttpEndpoint(t *testing.T) {
 	)
 
 	// http request
-	rec := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/test", nil)
-	httpServer.ServeHTTP(rec, req)
+	rec := fxhttpservertest.RecordResponse(httpServer, req)
 
 	// http response assertion
-	assert.Equal(t, 200, rec.Code)
-	assert.Contains(t, rec.Body.String(), "test")
+	fxhttpservertest.AssertRecordedResponseCode(t, rec, 200)
+	fxhttpservertest.AssertRecordedResponseBody(t, rec, `{"value":"testtest"}`)
 
 	// log assertion
 	fxloggertest.AssertHasLogRecord(t, map[string]interface{}{
