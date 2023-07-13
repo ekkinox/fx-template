@@ -12,7 +12,7 @@ func NewDefaultHealthCheckerFactory() HealthCheckerFactory {
 
 func (f *DefaultHealthCheckerFactory) Create(options ...HealthCheckerOption) (*HealthChecker, error) {
 
-	appliedOpts := defaultHeatchCheckerOptions
+	appliedOpts := defaultHealthCheckerOptions
 	for _, applyOpt := range options {
 		applyOpt(&appliedOpts)
 	}

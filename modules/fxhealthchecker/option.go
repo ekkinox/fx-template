@@ -4,7 +4,7 @@ type options struct {
 	Probes []HealthCheckerProbe
 }
 
-var defaultHeatchCheckerOptions = options{
+var defaultHealthCheckerOptions = options{
 	Probes: []HealthCheckerProbe{},
 }
 
