@@ -7,5 +7,5 @@ import (
 )
 
 func CtxLogger(ctx context.Context) *Logger {
-	return &Logger{*zerolog.Ctx(ctx)}
+	return &Logger{zerolog.Ctx(ctx)}
 }

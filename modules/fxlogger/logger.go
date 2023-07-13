@@ -9,13 +9,13 @@ const (
 )
 
 type Logger struct {
-	zerolog.Logger
+	*zerolog.Logger
 }
 
 func (l *Logger) ToZerolog() *zerolog.Logger {
-	return &l.Logger
+	return l.Logger
 }
 
 func FromZerolog(logger zerolog.Logger) *Logger {
-	return &Logger{logger}
+	return &Logger{&logger}
 }

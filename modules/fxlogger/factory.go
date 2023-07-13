@@ -31,5 +31,5 @@ func (f *DefaultLoggerFactory) Create(options ...LoggerOption) (*Logger, error) 
 		Logger().
 		Level(appliedOpts.Level)
 
-	return &Logger{logger}, nil
+	return &Logger{&logger}, nil
 }
