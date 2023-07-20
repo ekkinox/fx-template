@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-dev
-    command: ["air", "-c", ".air.server.toml", "--", "server"]
+    command: ["server"]
     networks:
       - network
     ports:
@@ -25,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-dev
-    command: ["air", "-c", ".air.worker.toml", "--", "worker"]
+    command: ["worker"]
     networks:
       - network
     ports:
@@ -40,10 +40,6 @@ services:
     restart: always
     networks:
       - network
-    ports:
-      - "3306:3306"
-    expose:
-      - "3306"
     volumes:
       - database_data:/var/lib/mysql
     env_file:
