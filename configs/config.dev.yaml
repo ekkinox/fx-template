@@ -6,7 +6,7 @@ modules:
   logger:
     level: debug
   tracer:
-    exporter: stdout
+    exporter: noop
 config:
   test:
     value: dev

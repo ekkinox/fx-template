@@ -123,35 +123,37 @@ func withDefaultMiddlewares(httpServer *echo.Echo, config *fxconfig.Config, trac
 		LogMethod:    true,
 		LogURI:       true,
 		LogStatus:    true,
-		LogRequestID: true,
 		LogLatency:   true,
 		LogUserAgent: true,
 		LogRemoteIP:  true,
 		LogReferer:   true,
 		LogError:     true,
+		LogHeaders: []string{
+			HeaderXRequestId,
+			HeaderTraceParent,
+		},
 		BeforeNextFunc: func(c echo.Context) {
-			requestId := c.Request().Header.Get(HeaderXRequestId)
-			if requestId == "" {
-				requestId = c.Response().Header().Get(HeaderXRequestId)
+
+			fields := map[string]interface{}{}
+
+			for _, h := range []string{
+				HeaderXRequestId,
+				HeaderTraceParent,
+			} {
+				v := extractHeader(c, h)
+				if v != nil {
+					fields[h] = v
+				}
 			}
 
-			traceParent := c.Request().Header.Get(HeaderTraceParent)
-			if traceParent == "" {
-				traceParent = c.Response().Header().Get(HeaderTraceParent)
-			}
-
-			cl := httpServer.Logger.(*EchoLogger).ToZerolog().
-				With().
-				Str(HeaderXRequestId, requestId).
-				Str(HeaderTraceParent, traceParent).
-				Logger()
+			cl := c.Logger().(*EchoLogger).ToZerolog().With().Fields(fields).Logger()
 
 			c.SetRequest(c.Request().WithContext(cl.WithContext(c.Request().Context())))
 			c.SetLogger(NewEchoLogger(fxlogger.FromZerolog(cl)))
 		},
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
 
-			zl := httpServer.Logger.(*EchoLogger).ToZerolog()
+			zl := c.Logger().(*EchoLogger).ToZerolog()
 
 			evt := zl.Info()
 			if v.Error != nil {
@@ -163,11 +165,19 @@ func withDefaultMiddlewares(httpServer *echo.Echo, config *fxconfig.Config, trac
 				Str("uri", v.URI).
 				Int("status", v.Status).
 				Str("latency", v.Latency.String()).
-				Str("x-request-id", v.RequestID).
-				Str("traceparent", c.Request().Header.Get(HeaderTraceParent)).
 				Str("remote-ip", v.RemoteIP).
-				Str("referer", v.Referer).
-				Msg("request")
+				Str("referer", v.Referer)
+
+			for headerName, headerValues := range v.Headers {
+				value := ""
+				if len(headerValues) != 0 {
+					value = headerValues[0]
+				}
+
+				evt.Str(strings.ToLower(headerName), value)
+			}
+
+			evt.Msg("request")
 
 			return nil
 		},
@@ -290,4 +300,18 @@ func withHealthCheckEndpoint(httpServer *echo.Echo, healthChecker *fxhealthcheck
 	})
 
 	return httpServer
+}
+
+func extractHeader(c echo.Context, headerName string) *string {
+	headerValue := c.Request().Header.Get(headerName)
+
+	if headerValue == "" {
+		headerValue = c.Response().Header().Get(headerName)
+	}
+
+	if headerValue == "" {
+		return nil
+	}
+
+	return &headerValue
 }
